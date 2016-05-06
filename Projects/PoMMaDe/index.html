@@ -1,0 +1,477 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>LIAFA -- Pommade</title>
+</head>
+
+<body>
+<blockquote>
+  <h1><strong><font color="#0000A0" size="7">Pommade</font></strong></h1>
+  <h1><strong><font size="5">A Model-Checker for Malware Detection</font></strong></h1>
+</blockquote>
+<table align="left" border="0" bordercolor="#ffffff" height="40" width="866">
+<tbody>
+<tr>
+<td bgcolor="#d7efff" width="140">
+<h2 align="center"><a href="#Introduction">Introduction</a></h2>
+</td>
+<td align="middle" bgcolor="#d7efff" width="140">
+<div align="center">
+<p><a href="#Download"><font size="5">Download</font></a></p>
+</div>
+</td>
+<td align="middle" bgcolor="#d7efff" width="140">
+<div align="center">
+<p><a href="#QuickStart"><font size="5">Quick Start</font></a></p>
+</div>
+</td>
+<td align="middle" bgcolor="#d7efff" width="140">
+<div align="center">
+<p><a href="#References"></a><a href="#Experiments"><font size="5">Experiments</font></a></p>
+</div>
+</td>
+<td align="middle" bgcolor="#d7efff" width="140">
+<div align="center">
+<p><a href="#Syntax"><font size="5">Usage</font></a></p>
+</div>
+</td>
+<td align="middle" bgcolor="#d7efff" width="140">
+<p><a href="#References"><font size="5">References</font></a><a href="#Experiments"></a></p>
+</td>
+<td>
+<div></div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div><a name="Introduction"></a>&nbsp;</div>
+<div>&nbsp;</div>
+<div><strong><font color="#0000ff" size="5">Introduction</font></strong></div>
+<p align"><font size="4"><span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> is a malware detector based on Pushdown Model-Checking techniques. Given a binary program, and a set of malicious behaviors expressed by SCTPL or SLTPL formulas, <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e </span></strong></span>outputs <strong>Yes</strong> if the program satisfies one of the&nbsp;formulas. It means that the binary program may be a malware. Otherwise, <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e </span></strong></span>outputs <strong>No</strong> meaning that the binary program is benign. As shown in the following figure, <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e </span></strong></span>consists of five components: <strong>Preprocessor</strong>, <strong>Oracle</strong>, <strong>Filter</strong>, <strong>Model Builder</strong> and <strong>Model-Checking Engines</strong>.</font></p>
+<p align="justify"><font size="4"><strong>Preprocessor</strong> uses <a href="http://code.google.com/p/pefile">PEfile</a> to check whether the binary program is packed or not. If this is the case, it&nbsp;uses the corresponding unpacker (if it exists) to unpack the binary code and feed the resulting binary program to <strong>Oracle</strong>. Otherwise, it directly passes the binary code to <strong>Oracle</strong>. So far, <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e </span></strong></span>supports dozens of popular packers for Windows, and hundreds of packers for Linux. Moreover, users can easily add a new unpacking tool by modifying the database file. <strong>Oracle</strong> takes as input a (unpacked) binary program and outputs the assembly program, and the informations of API functions and the states (values of the registers and memory addresses at each control point). <strong>Oracle</strong> relies on <a href="http://www.jakstab.org">Jakstab</a> and <a href="http://www.hex-rays.com/">IDA Pro</a>. Jakstab performs static analysis of the binary program, provides an assembly program and the states. However, it does not allow to extract the informations of API functions and some indirect calls to the API functions. <strong>Oracle</strong> uses IDA Pro to get these informations. The outputs of <strong>Oracle</strong> are used by <strong>Filter</strong> to filter out benign programs <strong>P</strong> according to the given optimization strategy by ``syntactically" checking the assembly program.&nbsp;<span style="FONT-VARIANT:small-caps"> <strong><span style="FONT-VARIANT:small-caps">P<span>o</span>MM<span>a</span>D<span>e</span></span><span> </span></strong></span>provides three strategies: (1) keywords strategy, (2)sequence strategy and (3) direct strategy. When ``keywords strategy" is chosen, the user has to provide a set of instructions to&nbsp;<span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span>. <strong>Filter</strong> will syntactically check whether or not the assembly program contains these instructions. If this is not the case,&nbsp; <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e&nbsp;</span></strong></span> outputs No (we know that <strong>P</strong> does not contain this malicious behavior, no need to apply model-checking). Otherwise, <strong>Model Builder</strong> is called (we need to apply model-checking to decide whether <strong>P</strong> is a malware or not). When ``sequence strategy" is chosen, the user has to provide a sequence of instructions to&nbsp; <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span>. <strong>Filter</strong> will ``syntactically" check in the control flow graph of the assembly program whether or not these instructions occur in the same order as in the sequence. If this is not the case, <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e </span></strong></span>outputs <strong>No</strong> (no need to apply model-checking, <strong>P</strong> is benign). Otherwise, <strong>Model Builder</strong> is called. If ``direct strategy" is chosen, <strong>Model Builder</strong> is directly called. <strong>Model Builder</strong> outputs a PDS modeling the assembly program. <strong>Model-Checking Engines</strong> takes as input the PDS from <strong>Model Builder</strong> and performs model-checking of the PDS against all the formulas given by the user. If there is one formula satisfied by the PDS,&nbsp; <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e </span></strong></span>outputs <strong>Yes</strong>. Otherwise&nbsp; <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e </span></strong></span>outputs <strong>No</strong>.</font></p>
+<p style="TEXT-ALIGN:center">&nbsp; 
+</p>
+<p style="TEXT-ALIGN:center;DISPLAY:block"><font size="3">
+</font></p>
+<p align="center"><img src="Architecture.png" width="831" height="292"></p>
+<font size="3">&nbsp;</font> 
+<p><span><a name="Download"></a><strong><font color="#0000ff" size="4">Download</font></strong></span><font size="3"> </font></p>
+<p><font size="3"><span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> has been tested mainly on Linux distributions <a href="PuMoC.tar.gz">Binary</a> </font></p>
+<blockquote><font size="3">&nbsp;</font></blockquote>
+<p><font size="3"><strong>Tips for installing <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> on Linux</strong><strong>.</strong></font></p>
+<p><font size="3"><span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> relies on a commerical tool IDA Pro and several open source tools (CUDD, libcstl and Jakstab). After downloading the source code of <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span>, these tools have to be installed. </font></p>
+<p><font size="3"><strong>IDA Pro</strong> is a disassembler. You can get it here http://www.hex-rays.com/products/ida/index.shtml and put IDA Pro in the directory of <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span>. After that, replace the file /IDAPRO/ida/idc/analysis.idc by our file </font><font size="3"><a href="https://sites.google.com/site/songfu1983/analysis.idc?attredirects=0">analysis.idc</a>, </font><font size="3">the file /IDAPRO/ida/idc/idc.idc by </font><a href="idc.idc"><font size="3">idc.idc</font></a><font size="3">. </font></p>
+<p><font size="3"><strong>cudd-2.4.2</strong> is in <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span>. Up-to-date versions can be obtained from the </font><a href="http://vlsi.colorado.edu/~fabio/CUDD/"><font size="3">CU Decision Diagram Package</font></a><font size="3"> . Use the following commands to install CUDD.</font></p>
+<blockquote>
+<p><strong><font size="3">tar -zxvf PuMoC.tar.gz</font></strong></p>
+<p><strong><font size="3">cd PuMoC/cudd-2.4.2 </font></strong></p>
+<p><strong><font size="3">make </font></strong></p>
+</blockquote>
+<p><font size="3">Copy object files <strong>libcudd.a, libepd.a, libmtr.a, libst.a, libutil.a </strong>from the directory <strong>cudd, epd, mtr, st, util </strong>to the directory <strong>lib in cudd-2.4.2 </strong>by the following commands: </font></p>
+<blockquote>
+<p><strong><font size="3">cp -i cudd/libcudd.a lib/ </font></strong></p>
+<p><strong><font size="3">cp -i epd/libepd.a lib/ </font></strong></p>
+<p><strong><font size="3">cp -i mtr/libmtr.a lib/ </font></strong></p>
+<p><strong><font size="3">cp -i st/libst.a lib/ </font></strong></p>
+<p><strong><font size="3">cp -i util/libutil.a lib/ </font></strong></p>
+</blockquote>
+<p><font size="3"><strong>libcstl</strong> is an open source library implementing STL library in C. <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> is equipped with libcstl-2.0.1. Up-to-date versions can be obtained from </font><a href="https://github.com/activesys/libcstl"><font size="3">https://github.com/activesys/libcstl</font></a><font size="3">. Use the following commands to instal libcstl: </font></p>
+<blockquote>
+<p><font size="3">./configure --prefix=/.../pommade/libcstl</font></p>
+<p><font size="3">make </font></p>
+</blockquote>
+<p><font size="3"><strong>Jakstab</strong> is static analysis tool for X86 binaries. <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> is equipped with </font><a href="http://www.jakstab.org"><font size="3">Jakstab</font></a><font size="3">. Compile <em>compile.sh </em>or <em>compile.bat</em> to install Jakstab. </font></p>
+<p><font size="3">&nbsp;</font></p>
+<p><font size="3">Now, you can install <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> by the commands:</font></p>
+<blockquote>
+<p><strong><font size="3">cd..</font></strong></p>
+<p><strong><font size="3">make</font></strong></p>
+<p><font size="3">&nbsp;</font></p>
+</blockquote>
+<p><span><a name="QuickStart"></a><strong><font color="#0000ff" size="4">QuickStart</font></strong></span></p>
+<p><font size="3">After installing the above libraries and <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> , you can evaluate an example by the following commands: </font></p>
+<blockquote>
+<p><font size="3">./pommade -l3fI2 malware/Email-Worm.Win32.NetSky.a formulas/sp.ctpl</font></p>
+</blockquote>
+<p><font size="3">Here the file <em>malware/Email-Worm.Win32.NetSky.a</em> is an email-worm, <em>formulas/sp.ctpl</em> contains a SCTPL formula that specifies the self-propagation behavior. -l3 specifies that the formula is in SCTPL. I2 specifies that the filter strategy is <em>sequence strategy</em>. The results are shown in the following figures.</font></p>
+<p align="center"><font size="3">
+</font></p>
+<p align="center"><img src="ctpl.jpg" width="831" height="292"></p>
+<p><font size="3">
+</font></p>
+<p align="center"><img src="ctpl2.jpg" width="831" height="292"></p> 
+<p><font size="3">&nbsp;</font></p>
+<p><font size="3"><span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> also supports SLTPL model-checking using the following commands:</font></p>
+<blockquote>
+<p><font size="3">./pommade -l5fI2 malware/Email-Worm.Win32.NetSky.a formulas/sp.ltpl</font></p>
+</blockquote>
+<p><font size="3">The results are shown in the following figures.</font></p>
+<p><font size="3">
+</font></p>
+<p align="center"><img src="ltpl.jpg" width="831" height="292"></p>  
+<p><font size="3">
+</font></p>
+<p align="center"><img src="ltpl2.jpg" width="831" height="292"></p>  
+<p><font size="3">&nbsp;</font></p>
+<p><font size="3">&nbsp;</font></p>
+<p><a name="Experiments"></a><strong><font color="#0000ff" size="4">Experiments</font></strong></p>
+<div><font size="3">All the experiments were run on a Linux platform (Fedora 13) with a 2.4GHz CPU, 2GB of memory. The time limit is fixed to&nbsp;20 minutes.</font></div>
+<div>&nbsp;</div>
+<div style="TEXT-ALIGN:left"><font size="3"><strong>Detecting Real Malwares:<br>
+</strong><span style="FONT-VARIANT:small-caps"><strong><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> is applied to check more than 600 real malwares and 400 benign programs taken from Microsoft Windows System.&nbsp; <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span>&nbsp; can detect all the real malwares and prove benign program are benign. In particular, our tool can detect the malware Flame, the most complex attack toolkit which can record audio conversations, intercept the keyboard, etc. Flame has been active for more that 5 years and was not detected by any antivirus. </font></div>
+<div>&nbsp;</div>
+<div><font size="3">The average time (resp. memory) of checking one malware against the satisfiable formula is 93.57 seconds (resp. 225.15 MB). The average time (resp. memory) of checking one benign program against all the malicious behaviors we considered is 24.73 seconds (resp. 21.86 MB) (Thanks to <strong>Filter</strong>, <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> does not need to apply model-checking for many benign programs).</font></div>
+<div>&nbsp;</div>
+<div><font size="3"><strong><span style="FONT-VARIANT:small-caps">P<span>o</span>MM<span>a</span>D<span>e</span></span>&nbsp; vs Existing Antiviruses:</strong></font></div>
+<div><font size="3"><span>&nbsp;&nbsp;&nbsp;&nbsp;</span>To compare our tool with the well-known existing anti-viruses, and show its robustness, we automatically created 200 new malwares using the generators NGVCK and VCL32. <a href="http://www.cs.sjsu.edu/faculty/stamp/students/Report.pdf"><font size="3">[Wong06]</font></a> showed that these systems are the best malware generators. These programs use very sophisticated features such as anti-disassembly, anti-debugging, anti-emulation, and anti-behavior blocking and come equipped with code morphing ability<br>
+which allows them to produce different-looking viruses. Our results are reported in the following Table. <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> was able to detect all these 200 malwares, whereas several well-known and widely used anti-viruses such as <a href="http://www.avira.com/"><font size="3">Avira</font></a><font size="3">, </font><a href="http://www.kaspersky.com/"><font size="3">Kaspersky</font></a><font size="3">, </font><a href="http://www.avast.com/"><font size="3">Avast</font></a><font size="3">, </font><a href="http://www.360.cn/"><font size="3">Qihoo 360</font></a><font size="3">, </font><a href="http://www.mcafee.com/"><font size="3">McAfee</font></a><font size="3">, </font><a href="http://www.avg.com/"><font size="3">AVG</font></a><font size="3">, </font><a href="http://www.bitdefender.com/"><font size="3">BitDefende</font></a><font size="3">, </font><font size="3"><a href="http://www.eset.com/">Eset Nod32</a></font><font size="3">, </font><a href="http://www.f-secure.com/"><font size="3">F-Secure</font></a><font size="3">, </font><a href="http://www.norton.com/"><font size="3">Norton</font></a><font size="3">, </font><a href="http://www.pandasecurity.com/"><font size="3">Panda</font></a><font size="3"> and </font><a href="http://www.trendmicro.com/"><font size="3">Trend Micro</font></a> were not able to detect several of them.</font></div>
+<div>&nbsp;</div>
+<div><font size="3"><span style="FONT-VARIANT:small-caps"><strong>&nbsp;</strong></span></font></div>
+<table align="left" bgcolor="#cccccc" border="1" bordercolor="#000000">
+<tbody>
+<tr>
+<th>Generator</th>
+<th>Number of Variants</th>
+<th><span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> </th>
+<th>Avira Detection Rate </th>
+<th>Kaspersky Detection Rate</th>
+<th>Avast Detection Rate</th>
+<th>Qihoo 360 Detection Rate</th>
+<th>McAfee Detection Rate</th>
+<th>AVG Detection Rate</th>
+<th>
+<p>BitDefende Detection Rate</p>
+</th>
+<th>Eset Nod32 Detection Rate</th>
+<th>F-Secure Detection Rate</th>
+<th>Norton Detection Rate</th>
+<th>Panda Detection Rate</th>
+<th>Trend Micro Detection Rate</th>
+</tr>
+<tr>
+<th>NGVCK</th>
+<td>
+<div align="center">100</div>
+</td>
+<td>
+<div align="center"><strong>100%</strong></div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+<td>
+<div align="center">23%</div>
+</td>
+<td>
+<div align="center">18%</div>
+</td>
+<td>
+<div align="center">68%</div>
+</td>
+<td>
+<div align="center">100%</div>
+</td>
+<td>
+<div align="center">11%</div>
+</td>
+<td>
+<div align="center">97%</div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+<td>
+<div align="center">68%</div>
+</td>
+<td>
+<div align="center">46%</div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+</tr>
+<tr>
+<th>VCL32</th>
+<td>
+<div align="center">100</div>
+</td>
+<td>
+<div align="center"><strong>100%</strong></div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+<td>
+<div align="center">2%</div>
+</td>
+<td>
+<div align="center">100%</div>
+</td>
+<td>
+<div align="center">99%</div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+<td>
+<div align="center">100%</div>
+</td>
+<td>
+<div align="center">100%</div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+<td>
+<div align="center">99%</div>
+</td>
+<td>
+<div align="center">30%</div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+<td>
+<div align="center">0%</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<h1><a name="Syntax"></a><span><strong><font color="#0000ff" size="4">Manual</font></strong></span></h1>
+<div><font size="3">To be able to use the PoMMaDe, you need to be familiar with the syntax of the logics SCTPL and SLTPL. Please see [ST12a], [ST12b] and [ST13] for the formal definition of these logics.</font></div>
+<div>&nbsp;</div>
+<div>
+<h3><font color="#0000ff" size="3">The implementation of SCTPL and SLTPL operators in <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e:</span></strong></span></font></h3>
+<table align="center">
+<tbody>
+<tr>
+<th style="BORDER-BOTTOM:#000000 3px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">SCTPL/SLTP</span><span style="COLOR:#000000">L </span><span style="COLOR:#000000">Operator</span><span style="COLOR:#000000">s </span></div>
+</th>
+<th style="BORDER-BOTTOM:#000000 3px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid"><span style="COLOR:#000000">Correspondin</span><span style="COLOR:#000000">g </span><span style="COLOR:#000000">Operator</span><span style="COLOR:#000000">s </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">n </span><span style="COLOR:#000000">P</span><span style="COLOR:#000000;FONT-SIZE:7.9pt">O</span><span style="COLOR:#000000">MM</span><span style="COLOR:#000000;FONT-SIZE:7.9pt">A</span><span style="COLOR:#000000">D</span><span style="COLOR:#000000;FONT-SIZE:7.9pt">E </span></th>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:16px;BORDER-TOP:#000000 3px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">Atomi</span><span style="COLOR:#000000">c </span><span style="COLOR:#000000">predicat</span><span style="COLOR:#000000">e </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:16px;BORDER-TOP:#000000 3px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-STYLE:italic;COLOR:#000000">b</span><span style="COLOR:#000000">(</span><span style="FONT-STYLE:italic;COLOR:#000000">p</span><span style="COLOR:#000000;FONT-SIZE:6.9pt">1</span><span style="FONT-FAMILY:sans-serif,rtxmi;COLOR:#000000">, </span><span style="FONT-FAMILY:sans-serif,rtxmi;COLOR:#000000">...</span><span style="FONT-FAMILY:sans-serif,rtxmi;COLOR:#000000">, </span><span style="FONT-STYLE:italic;COLOR:#000000">p</span><span style="FONT-STYLE:italic;COLOR:#000000;FONT-SIZE:6.9pt">n</span><span style="COLOR:#000000">)</span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;VERTICAL-ALIGN:middle;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Regular predicate </th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,rtxmi;COLOR:#000000">#</span><span style="FONT-STYLE:italic;COLOR:#000000">e</span><span style="FONT-FAMILY:sans-serif,rtxmi;COLOR:#000000"># </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;VERTICAL-ALIGN:middle;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">¬ </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">! </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">∨ </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">||</span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">∧ </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">&amp;</span><span style="COLOR:#000000">&amp; </span></div>
+</td>
+</tr>
+<tr>
+<th rowspan="2" style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:33px;VERTICAL-ALIGN:middle;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">∃</span><span style="FONT-STYLE:italic;COLOR:#000000">x </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">E</span><span style="COLOR:#000000">s x </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">f </span><span style="FONT-STYLE:italic;COLOR:#000000">x </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">s </span><span style="COLOR:#000000">use</span><span style="COLOR:#000000">d </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">n </span><span style="COLOR:#000000">regula</span><span style="COLOR:#000000">r </span><span style="COLOR:#000000">variabl</span><span style="COLOR:#000000">e </span><span style="COLOR:#000000">expression</span><span style="COLOR:#000000">s </span></div>
+</td>
+</tr>
+<tr>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:16px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">Eo x if </span><span style="FONT-STYLE:italic;COLOR:#000000">x </span><span style="COLOR:#000000">is used in atomic predicates </span></div>
+</td>
+</tr>
+<tr>
+<th rowspan="2" style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:32px;VERTICAL-ALIGN:middle;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">∀</span><span style="FONT-STYLE:italic;COLOR:#000000">x </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">A</span><span style="COLOR:#000000">s x </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">f </span><span style="FONT-STYLE:italic;COLOR:#000000">x </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">s </span><span style="COLOR:#000000">use</span><span style="COLOR:#000000">d </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">n </span><span style="COLOR:#000000">regula</span><span style="COLOR:#000000">r </span><span style="COLOR:#000000">variabl</span><span style="COLOR:#000000">e </span><span style="COLOR:#000000">expression</span><span style="COLOR:#000000">s </span></div>
+</td>
+</tr>
+<tr>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:16px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">A</span><span style="COLOR:#000000">o x </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">f </span><span style="FONT-STYLE:italic;COLOR:#000000">x </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">s </span><span style="COLOR:#000000">use</span><span style="COLOR:#000000">d </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">n </span><span style="COLOR:#000000">atomi</span><span style="COLOR:#000000">c </span><span style="COLOR:#000000">predicate</span><span style="COLOR:#000000">s </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000;FONT-WEIGHT:normal">X </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">X </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000;FONT-WEIGHT:normal">F </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">F </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000;FONT-WEIGHT:normal">G </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">G </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000;FONT-WEIGHT:normal">U </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">U </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000;FONT-WEIGHT:normal">R </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">W </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000;FONT-WEIGHT:normal">A </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">A </span></div>
+</td>
+</tr>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000;FONT-WEIGHT:normal">E </span></div>
+</th>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000">E </span></div>
+</td>
+</tr>
+</tbody>
+</table>
+<p><font size="3">Note that in the atomic predicate b(p1,...,pn), b is the operator of the instruction, p1,...,pn are operands of the instruction. If pi denotes some constant n (number or string), then pi should be 'n. (For example, if pi is the constant 100, we write '100). Otherwise, we know that pi is a variable.</font></p>
+<p><font size="3">In the regular predicate #e# , e is a regular expression defined as follows. </font></p>
+<h3><font color="#0000ff" size="3">The syntax of regular variable expression (Regular Valuations) in<span style="FONT-VARIANT:small-caps"><strong> P<span>o</span>MM<span>a</span>D<span>e</span></strong></span>.</font></h3>
+<table align="center" style="WIDTH:336px;HEIGHT:142px">
+<tbody>
+<tr>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:67px;HEIGHT:38px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000"><font size="3">identiﬁer </font></span></div>
+</th>
+<th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:175px;HEIGHT:38px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000"><font size="3">[a-zA-Z0-9][a-zA-Z0-9 $:] </font></span></div>
+</th>
+</tr>
+<tr>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:67px;HEIGHT:18px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,rtxr;COLOR:#000000"><font size="3">+ </font></span></div>
+</td>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:175px;HEIGHT:18px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="COLOR:#000000"><font size="3">+ </font></span></div>
+</td>
+</tr>
+<tr>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:67px;HEIGHT:18px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000"><font size="3">· </font></span></div>
+</td>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:175px;HEIGHT:18px;VERTICAL-ALIGN:top;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000"><font size="3">.</font></span></div>
+</td>
+</tr>
+<tr>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:67px;HEIGHT:18px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,rtxmi;COLOR:#000000"><font size="3">Γ </font></span></div>
+</td>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:175px;HEIGHT:18px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span><font size="3">|</font></span></div>
+</td>
+</tr>
+<tr>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:67px;HEIGHT:18px;VERTICAL-ALIGN:top;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span><font size="3">*</font></span></div>
+</td>
+<td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:175px;HEIGHT:18px;VERTICAL-ALIGN:top;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000"><font size="3">*</font></span></div>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 align="center"><font size="3">&nbsp; </font></h3>
+<p><font size="3">For example, the SCTPL formula, <span>∃x EF ( call(GetModuleFileNameA) ∧ 0xΓ*∧ EF(call(CopyFileA) ∧ xΓ*) )</span> will be in <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> syntax as follows:</font></p>
+<p align="center"><font size="3"><font color="#ff0000"><span>Es x EF( call(GetModuleFileNameA) &amp;&amp; #0.x.|*#&amp;&amp; EF(call(CopyFileA) &amp;&amp; #x.|*#) )</span> </font></font></p>
+<p align="center">&nbsp;</p>
+<p align="left"><font size="3">The SLTPL formula G ( F ( ∃x cmp(x, 5A4Dh) ∧ F ∃y cmp(y, 4550h) ) ) will be in PoMMaDe syntax as follows:</font></p>
+<p style="TEXT-ALIGN:center"><font color="#ff0000" size="3">G ( F ( Eo x cmp(x, 5A4Dh) ∧ F Eo y cmp(y, 4550h) ) )</font></p>
+<p align="center">&nbsp;</p>
+</div>
+<div><font size="3"><font color="#ff0000">The usage</font> of <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> is as follows: <span>pommade [-&lt;options&gt;] &lt;modelfile&gt; &lt;formula&gt;</span></font></div>
+<p><font size="3">&lt;modelfile&gt; should be a binary program. &lt;formula&gt; is either a SCTPL formula or SLTPL formula.</font></p>
+<p><font size="3">The options of <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> are as follows:</font></p>
+<blockquote>
+<p><font size="3">-n: Translate a SLTPL formula into a LTL formula with regular valuations, then apply LTL model-checking with regular valuations for pushdown systems<br>
+<br>
+-A: Enable abstraction w.r.t. the specification (more details about the abstraction can be found in [ST12b]). <br>
+-o: Output the pushdown system modelling the binary program.</font></p>
+<font size="3">-In: Specify the filter strategy: direct strategy, or keywords strategy or sequence strategy.<br>
+</font><font size="3"><span>-n=0: direct strategy, default.<br>
+<span>-n=1: The strategy is keywords strategy.</span><br>
+-n=2: The strategy is sequence strategy.</span><br>
+<br>
+-ln: Specify the type of model checking.<br>
+</font><span><font size="3">-n=3: SCTPL model checking, i.e, the formula is a SCTPL formula.<br>
+<span>-n=5: SLTPL model checking, i.e, the formula is a SLTPL formula.</span> </font></span></blockquote>
+<h3>&nbsp;</h3>
+<p><a name="References"></a><strong><font color="#0000ff" size="4">References</font></strong></p>
+<p>
+[TACAS12] Fu Song and Tayssir Touili. Pushdown Model-Checking for Malware Detection. <em>In   TACAS 2012.</em> [ <A href="TACAS.pdf">PDF</A>]<BR>
+[FM12] Fu Song and Tayssir Touili.  Efficient Malware Detection Using Model-Checking. <em>In    FM 2012.</em> [ <a href="FM12.pdf">PDF</a>]<BR>
+[TACAS13] Fu Song and Tayssir Touili. LTL Model-Checking for Malware Detection. <em>In    TACAS 2013.</em> [ <a href="TACAS13.pdf">PDF</a>]<BR>
+[ESECFSE] Fu Song and Tayssir Touili. POMMADE:PushdOwn Model-checking for Malware DEtection. <em>In    ESEC/FSE 2013.</em> [ <a href="ESECFSE.pdf">PDF</a>]<BR>
+[STTT13] Fu Song and Tayssir Touili.  Pushdown Model-Checking for Malware Detection. <em>In    STTT 2013.</em> [ <a href="STTT13.pdf">PDF</a>]
+</p>
+ 
+ 
+<p><font size="3">&nbsp;</font></p>
+<p><font size="3"><strong>Contact</strong>: <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> is written and maintained by </font><a href="mailto:songfu1983@gmail.com"><font size="3">Fu Song</font></a><font size="3">. </font></p>
+<p><font size="3">&nbsp;</font></p>
+
+
+
+
+ 
+<p></p>
+<p></p>
+
+</body>
+</html>

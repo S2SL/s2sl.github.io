@@ -1,0 +1,242 @@
+﻿
+<HTML>
+<HEAD>
+<TITLE>Fu SONG's Home Page</TITLE>
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+</HEAD>
+
+<BODY leftMargin="0" topMargin="0" marginheight="0" marginwidth="0">
+<TABLE cellSpacing="0" cellPadding="0" width="900" align="center" border="0">
+<TBODY>
+	<TR>
+	<TD width="831" height="17"></TD>
+	</TR>
+
+	<TR>
+	<TD align="left" height="75"><div align="left"><FONT color="#0000FF" size="25px"><B>Fu SONG </B></FONT></div> 
+		<p><img src="Head.jpg" width="700" height="200"><img src="myfig.jpg" width="150" height="200">
+</p>
+		</TD>
+	</TR>
+ 
+	<TR>
+	<TD background="images/back1.jpg" height="6"><SPACER height="6" type="block"></TD>
+	</TR>  
+    
+	 
+
+ 
+          
+	<TR><TD>
+	<TABLE>
+	<TR>
+	<TD>
+	<TABLE>
+	<TR><B><font size="+1"><hr></hr> About me:</font></B>
+	  <TD><div align="justify"><blockquote>
+	  	<p>Since Jan.2016: I am a Associate Research Professor at <a href="http://www.sei.ecnu.edu.cn">Software Engineering Institute</a> in the <a href="http://www.ecnu.edu.cn">East China Normal University</a> (Shanghai, China). </p>
+	    <p>Aug.2013-Dec.2015: I was a Lecturer at <a href="http://www.sei.ecnu.edu.cn">Software Engineering Institute</a> in the <a href="http://www.ecnu.edu.cn">East China Normal University</a> (Shanghai, China). </p>
+	    <p>Jul.2014-Sep.2014: I was a visiting researcher at Computer Security Lab of <a href="http://www.ntu.edu.sg">Nanyang Technological University</a>.</p>
+	    <p>Dec.2009-Apr.2013: I was a doctoral student in <a href="http://www.liafa.univ-paris-diderot.fr/">LIAFA</a>   (<a href="http://www.univ-paris-diderot.fr">
+	    University Paris Diderot- Paris 7</a>), under the supervision of <a href="http://www.liafa.univ-paris-diderot.fr/~touili">Tayssir Touili</a> </p>	 
+	    <p>Mar.2007-Jun.2009: I was a graduate student on Software Engineering at East China Normal University. </p>
+	    <p>Sep.2002-Jun.2006: I was a undergraduate student on Electronic Information Science and Technology at Ningbo University (Ningbo China).</p>
+	    </blockquote></div></TD>
+	</TR>
+	<TR><TD> </TD></TR>
+	</TABLE>	</TD></TR>
+	</TABLE>
+	</TD></TR>
+
+	<TR>
+	<TD><BR/>
+	  <B><font size="+1"><hr></hr>Research Interests:</font></B></TD>
+	</TR>
+	<TR>
+	<TD background="images/back1.jpg" height="2"><SPACER height="2" type="block"></TD>
+	</TR>
+	<TR>
+	  <TD><font size="+0"><blockquote>
+	  	Model-checking,  Binary/Source program analysis &amp; verification, Computer security 
+	  	<blockquote></font></TD>
+	</TR>
+
+	<TR>
+	<TD><BR/>
+	  <B><font size="+1"><hr></hr>Contact Me:</font></B></TD>
+	</TR>
+
+	<TR>
+	<TD background="images/back1.jpg" height="2"><SPACER height="2" type="block"></TD>
+	</TR>
+
+	<TR> 
+	<TD><blockquote>
+	<TABLE><TR><TD><font size="+0">Email:  </font></TD>
+	<TD><p><font size="+0">fsong(at)sei.ecnu.edu.cn, songfu1983(at)gmail.com(permanent) </font></p></TD>
+	</TR>
+		<TR><TD><font size="+0">Tel:  </font></TD>
+		<TD><font size="+0">+86-(0)21-62231529</font></TD>
+		</TR>
+	<TR><TD><font size="+0">Office:  </font> </TD><TD><font size="+0">Room 911, Science Building(B), 3660 Zhongshan Road(N), Shanghai, 200062.</font></TD></TR>
+ <TR><TD><font size="+0">办公室:  </font> </TD><TD><font size="+0">中山北路3663号，理科大楼B911.</font></TD></TR>
+ 
+	</TABLE></blockquote>	</TD>
+	</TR>
+	 
+
+ 	<TR>
+	<TD><font size="+1"><BR/>
+	    <B>Please feel free to contact me if you are interested in my research.</B></font></TD>
+	</TR>
+
+	<TR>
+	<TD><font size="+1"><BR/>
+	    <B><hr></hr>Projects:</B></font></TD>
+	</TR>
+ <TR>
+	<TD background="images/back1.jpg" height="10"><SPACER height="10" type="block"></TD>
+	</TR>
+		<TR>
+	  <TD><ul><font size="+0">
+	  	<li><a>The Natural Science Foundation of China (PI,2015.01-2017.12) </a></li>
+	    <li><a>The Pujiang Talent Project of the Shanghai Science and Technology Committee (PI,2014.06-2016.06)</a></li>
+	    <li><a>The ChenGuang Project of the Shanghai Municipal Education Commission and the Shanghai Education Development Foundation (PI,2014.01-2015.12)</a></li>
+	    <li><a>The Open Project of Shanghai Key Laboratory of Trustworthy Computing (PI,2014.01-2014.12)</a></li>
+	 </font> </ul>	    
+      </TD>
+    </TR>
+     
+		
+	<TR>
+	<TD><font size="+1"><BR/>
+	    <B><hr></hr>Publications:</B></font></TD>
+	</TR>
+
+	<TR>
+	<TD background="images/back1.jpg" height="10"><SPACER height="10" type="block"></TD>
+	</TR>
+	<TR>
+	<TD> <font size="+1"><B>Conferences</B></font></TD>
+	</TR>
+	<TR>
+	<TD background="images/back1.jpg" height="10"><SPACER height="10" type="block"></TD>
+	</TR>
+	<TR>
+	<TD>
+		<ul> <font size="+0">
+ <p align="justify">17. Taolue Chen, <strong> Fu Song</strong> and Zhilin Wu. <a href=publications/ijcai16.pdf>Verifying Pushdown Multi-Agent Systems against Strategy Logics.</a><em> In Proc. of the 25th International Joint Conference on Artifficial Intelligence (IJCAI 2016).</em> New York, USA. 9-15 July, 2016.</p>
+ 
+ <p align="justify">16. Taolue Chen, <strong> Fu Song</strong> and Zhilin Wu. <a href=publications/AAAI16.pdf> Global Model Checking on Pushdown Multi-Agent Systems.</a><em> In Proc. of the 30th AAAI Conference on Artifficial Intelligence (AAAI 2016).</em> Arizona, USA. 12-17 February, 2016.</p>
+
+ <p align="justify">15. <strong> Fu Song</strong>, Weikai Miao, Geguang Pu and Min Zhang. <a href=publications/CONCUR15b.pdf>On Reachability Analysis of Pushdown Systems with Transductions: Application to Boolean Programs with Call-by-Reference.</a><em> In Proc. of the 26th International Conference on Concurrency Theory (CONCUR 2015).</em> Madrid, Spain. 1-4 September, 2015.</p>
+
+ <p align="justify">14. Taolue Chen, <strong> Fu Song（Co-corresponding author）</strong> and Zhilin Wu. <a href=publications/CONCUR15a.pdf>On the Satisfiability of Indexed Linear Temporal Logics.</a><em> In Proc. of the 26th International Conference on Concurrency Theory (CONCUR 2015).</em> Madrid, Spain. 1-4 September, 2015.</p>
+
+ <p align="justify">13. Bo Li, Mengdi Wang, Yongxin Zhao, Geguang Pu, Huibiao Zhu, <strong> Fu Song</strong>. <a href=publications/HASE15.pdf>Modeling and Verifying Google File System.</a><em> In Proc. of 16th IEEE International Symposium on High Assurance Systems Engineering
+ (HASE 2015).</em> Daytona Beach, FL, USA. 8-10 January, 2015.</p>
+
+ <p align="justify">12. <strong> Fu Song</strong> and Zhilin Wu. <a href=publications/FSTTCS14.pdf>Extending temporal logics with data variable quantifications.</a><em> In Proc. of the 34th Foundations of Software Technology and Theoretical Computer Science (FSTTCS 2014).</em> New Delhi, India. 15-17 December, 2014.</p>
+			
+ <p align="justify">11. <strong> Fu Song</strong> and Tayssir Touili. <a href=publications/APLAS14.pdf>Model Checking for Android Malware Detection.</a><em> In Proc. of the 12th Asian Symposium on Programming Languages and Systems (APLAS 2014).</em> Singapore. 17–19 November, 2014.</p>
+					
+ <p align="justify">10. <strong> Fu Song</strong> and Tayssir Touili. <a href=publications/APLAS13.pdf>Model Checking Dynamic Pushdown Networks.</a><em> In Proc. of the 11th Asian Symposium on Programming Languages and Systems (APLAS 2013).</em> Melbourne, Australia. 9–11 December, 2013. DOI:10.1007/978-3-319-03542-0_3.</p>
+		  
+ <p align="justify">9. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/ESECFSE13.pdf">POMMADE:PushdOwn Model-checking for Malware DEtection</a>.  <em> In Proc. of the 9th joint meeting of the European Software Engineering Conference and the ACM SIGSOFT Symposium on the Foundations of Software Engineering (ESEC/FSE 2013).</em> Saint Petersburg, Russia.  August 18–26, 2013. DOI:10.1145/2491411.2494599.</p>
+		 
+ <p align="justify">8. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/iFM13.pdf">Model-Checking Software Library API Usage Rules</a>.  <em>In Proc. of the 10th International Conference on integrated Formal Methods (iFM 2013).</em> Turku, Finland. June 10-14, 2013.  DOI:10.1007/978-3-642-38613-8_14.</p>
+	     
+ <p align="justify">7. <strong>Fu Song </strong>and Tayssir Touili. <a href="publications/TACAS13.pdf">LTL Model-Checking For Malware Detection</a>. <em>In Proc. of the 19th International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS 2013).</em> Rome, Italy. March 16-24, 2013。 DOI:10.1007/978-3-642-36742-7_29. </p>
+	     
+ <p align="justify">6. <strong>Fu Song </strong>and Tayssir Touili. <a href="publications/ASE12.pdf">PuMoC: A CTL Model-Checker For Sequential Programs</a>. <em>In Proc. of the 27th IEEE/ACM International Conference On Automated Software Engineering (ASE 2012)</em>. Essen, German. 3-7 Sept. 2012. DOI:10.1145/2351676.2351743. </p>
+		 
+ <p align="justify">5. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/FM12.pdf">Efficient Malware Detection Using Model-Checking</a>. <em>In Proc. of the 18th International Symposium on Formal Methods (FM 2012)</em>. Paris, France. 27-31 Aug. 2012.  DOI:10.1007/978-3-642-32759-9_34.</p>
+		 
+ <p align="justify">4. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/TACAS12.pdf">Pushdown Model-Checking for Malware Detection</a>. <em>In Proc. of the 18th International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS 2012).</em> Tallinn, Estonia. March 24-April 1, 2012. DOI:10.1007/978-3-642-28756-5_9. <strong>This paper won the EASST best paper award at ETAPS 2012.</strong> </p>
+		  
+ <p align="justify">3. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/CONCUR2011.pdf">Efficient CTL Model-Checking for Pushdown Systems</a>. <em>In Proc. of the International Conference on Concurrency Theory (CONCUR 2011</em>). Aachen, Germany. 6-9 Sep. 2011. DOI:10.1007/978-3-642-23217-6_29. </p>
+		  
+ <p align="justify">2. Jiehui Chen, Chulsoo Kim and <strong>Fu Song.</strong>.  <a href="publications/CMC10.pdf">A Distributed Clustering Algorithm for Voronoi Cell-based Large Scale Wireless Sensor Network</a>. <em> In Proc. of the International Conference on Communications and Mobile Computing (IEEE CMC 2010)</em>. Shenzhen, China. 12-14 April 2010. DOI:10.1109/CMC.2010.230.</p>
+		  
+ <p align="justify">1. Jiaming Zhou, Jian Guo and<strong> Fu Song</strong>. <a href="publications/ICIECS09.pdf">Integrating the B-method into PVS</a>.  <em>  In Proc. of the International Conference on Information Engineering and Computer Science (ICIECS 2009)</em>. Wuhan, China. 19-20 Dec. 2009. DOI:10.1109/ICIECS.2009.5363595. </p>
+	   </font> </ul>
+	   <BR/>
+	<TR>
+	<TD> <font size="+1"><B>Journals</B></font></TD>
+	</TR>
+	<TR>
+	<TD background="images/back1.jpg" height="10"><SPACER height="10" type="block"></TD>
+	</TR>
+	
+		<TR>
+	<TD>
+		<ul> <font size="+0">
+<!--
+
+<p align="justify">4. Jianqi Shi, Qin Li, Longfei Zhu, Xin Ye, Yanhong Huang, Huixing Fangy and <strong>Fu Song</strong>. <a href="publications/MPiE14.pdf">Towards A Binary Intermediate Language for Real-Time Embedded System</a>. <em>In Press of Journal on Mathematical Problems In Engineering, 2014. </p>
+<p align="justify">3. Jianqi Shi, Huixing Fang, Yanhong Huang, <strong>Fu Song</strong>(corresponding author) and Jian Guo. <a href="publications/SWJ14.pdf">Verifying Interrupt Properties of Real-Time Embedded System in Binary Code Perspective</a>. <em>In Press of The Scientific World Journal-Computer Science, 2014.</p>
+-->
+
+<p align="justify">6. Ya Gao, Peng Zeng, Kim-Kwang Raymond Choo and <strong>Fu Song</strong>. <a href="publications/IJNS.pdf">An Improved Online/Offline Identity-Based Signature Scheme for WSNs.</a><em> International Journal of Network Security (IJNS), volume 18(6), pages 1143-1151, November 2016.</em></p>
+<p align="justify">5. <strong>Fu Song</strong> and Zhilin Wu. <a href="publications/JOS16.pdf">Survey on Formal Models to Reason about Infinite Data Values (In Chinese).</a><em> Journal of Software (JOS), March 2016. DOI: 10.13328/ j.cnki.jos.004989.</em></p>
+<p align="justify">4. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/SoSym15.pdf">Model-checking software library API usage rules.</a><em> Int. Journal on Software and Systems Modeling(SoSym), May 2015. DOI 10.1007/s10270-015-0473-1.</em></p>
+<p align="justify">3. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/FAOC15.pdf">Model Checking Dynamic Pushdown Networks.</a><em> Int. Journal on Formal Aspects of Computing (FAOC), volume 27(2), March 2015, Pages 397-421 . DOI:10.1007/s00165-014-0330-y.</em></p>
+<p align="justify">2. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/TCS14.pdf">Efficient CTL Model-Checking for Pushdown Systems.</a><em> Int. Journal on Theoretical Computer Science (TCS), Volume 549, 11 September 2014, Pages 127–145. DOI:10.1016/j.tcs.2014.07.001.</p>
+<p align="justify">1. <strong>Fu Song</strong> and Tayssir Touili. <a href="publications/STTT13.pdf">Pushdown Model-Checking for Malware Detection.</a><em> Int. Journal on Software Tools for Technology Transfer (STTT), Volume 16(2), April 2014, Pages 147-173. DOI:10.1007/s10009-013-0290-1.</p>
+			 
+ </font> </ul>
+	  <BR/>
+	
+	
+	
+	
+	<TR>
+	  <TD><font size="+1"><B><hr></hr>Reviewer for Conferences:</B></font> </TD>
+	</TR>
+	<TR>  
+	  <TD><font size="+0"><blockquote>
+	  	 VMCAI'14, POPL'14, CONCUR'13, SPIN'12, AVoCS'12.
+	  	 </blockquote></font></TD> 
+	</TR>
+    	<TR>
+	
+	</TR>
+        <TR>
+	      <TD><font size="+1"><B><hr></hr>Tools:(I would appreciate if you drop me an email when using our tools.)</B></font></TD>
+	<TD background="images/back1.jpg" height="2"><SPACER height="2" type="block"></TD>
+	</TR>
+
+	<TR>
+	  <TD><UL>
+	    <LI><a href="Projects/PuMoC"><font="+2">PuMoC: A CTL Model-Checker for Sequential Programs</a></font> </LI>
+	    <LI><a href="Projects/PoMMaDe">POMMADE:A PushdOwn Model-checker for MAlware DEtection  </LI>
+	  
+	   </UL></TD>
+     </TR>
+	<TR>
+	  <TD><font size="+1"><B><hr></hr>Links:</B></font></TD>
+    </TR>
+	<TR>
+	  <TD><ul>
+	    <li><a href="2015ccfmulu">CCF Computer Science Conference/Journal Rankings</a></li> 
+      <li><a href="http://lipn.univ-paris13.fr/~andre/conferences.php">Some Conferences on Formal Methods</a></li>
+	    <li><a href="http://d3s.mff.cuni.cz/links/conferences/">A good collection of conferences' deadlines</a></li>
+	   </ul>	    
+      </TD>
+    </TR>
+	<TR>
+		
+	<TR>
+	  <TD><font size="+1"><B><hr></hr>Utilities:</B></font></TD>
+    </TR>
+	<TR>
+	  <TD><ul>
+	    <li><a href="http://www.jonathanbeard.io/tutorials/FlexBisonC++">Flex and Bison in C++, a short example by Jonathan Beard</a></li>
+	    <li><a href="http://web.engr.illinois.edu/~taoxie/advice/index.html">Advice for Researchers and Students by Prof. Tao Xie</a> </li>
+	   </ul>	    
+      </TD>
+    </TR> 
+</TBODY>
+</TABLE>
+</BODY>
+</HTML>

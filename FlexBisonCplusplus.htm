@@ -1,0 +1,2104 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)http://www.jonathanbeard.io/tutorials/FlexBisonC++.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Flex and Bison in C++, a short example</title>
+    <meta name="viewport" content="width=device-width">
+    <meta property="og:site_name">
+    <meta property="og:title" content="Flex and Bison in C++, a short example">
+    <meta property="og:description">
+    <meta property="og:image" content="http://jonathanbeard.io/img/30930.jpg">
+    <meta name="description" content="How to get flex and bison to work together in C++">
+    <meta name="keywords" content="Flex, Bison, C++, Example, Pure, Scanner, Parser">
+    <link rel="canonical" href="./FlexBisonCplusplus_files/FlexBisonCplusplus.htm">
+
+    <!-- Custom CSS & Bootstrap Core CSS - Uses Bootswatch Flatly Theme: http://bootswatch.com/flatly/ -->
+    <link rel="stylesheet" href="http://www.jonathanbeard.io/style.css">
+
+    <!-- Custom Fonts -->
+    <!--<link href='http://fonts.googleapis.com/css?family=Shadows+Into+Light|Source+Code+Pro:400,900|Inconsolata:700|Cinzel:400,700,900|Special+Elite|Press+Start+2P' rel='stylesheet' type='text/css'>-->
+    <link rel="stylesheet" href="http://www.jonathanbeard.io/css/font-awesome/css/font-awesome.min.css">
+   <link href="./FlexBisonCplusplus_files/css" rel="stylesheet" type="text/css">
+   <link href="http://www.jonathanbeard.io/feed.xml" rel="alternate" type="application/atom+xml">
+   <script async="" src="./FlexBisonCplusplus_files/analytics.js"></script><script async="">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-64918761-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+    <body id="page-top" data-spy="scroll" data-target=".navbar-fixed-top">
+     <!-- Navigation -->
+    <nav class="navbar navbar-custom navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
+                <ul class="nav navbar-nav">
+                    <!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+                    <li class="hidden active">
+                        <a href="http://www.jonathanbeard.io/tutorials/FlexBisonC++.html#page-top"></a>
+                    </li>
+                    <li>
+                        <a class="page-scroll" href="http://www.jonathanbeard.io/index.html">Home</a>
+                    </li>
+                    <li>
+                        <a class="page-scroll" href="http://www.jonathanbeard.io/#about">About</a>
+                    </li>
+                    
+                    <li>
+<a class="page-scroll" href="http://www.jonathanbeard.io/publications">Publications</a>
+</li>
+<li>
+<a class="page-scroll" href="http://www.jonathanbeard.io/tutorials">Tutorials</a>
+</li>
+<li>
+<a class="page-scroll" href="http://www.jonathanbeard.io/software">Software</a>
+</li>
+<li>
+<a class="page-scroll" href="http://www.jonathanbeard.io/blog">Blog</a>
+</li>
+<!-- 
+FIXME: finish these pages
+<li>
+<a class="page-scroll" href="/research">Research</a>
+</li>
+-->
+
+                    
+                    <li>
+                        <a class="page-scroll" href="http://www.jonathanbeard.io/#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    
+<!--    <div class="clear"> -->
+      <div class="container content-section">
+      <div class="row">
+      <div class="col-lg-8 col-lg-offset-2">
+<!--      <div class="block">
+         <div class="clear"> -->
+            <div id="container">
+  <div id="header">
+    <h1>Flex and Bison in C++</h1>
+
+  <!-- end #header --></div>
+  <div id="mainContent">
+   <h3>Notes before getting started</h3>
+   <p>
+      To compile the example located on <a href="https://github.com/jonathan-beard/simple_wc_example">GitHub</a>
+      you'll need a few things.  First, you'll need the <a href="http://flex.sourceforge.net/">Flex</a> utility.
+      Some systems come with it pre-installed with developer or build tools, but you'll need to make sure that
+      it is a relatively recent version (e.g., 2.5.37).  One issue that might arise for Apple users is an incompatible
+      version of Flex.  The default installed version is 2.5.35 (Apple provided), however the header file that
+      is included won't work with this example.  One solution is changing the example, however that will make it
+      incompatible with any recent version of Flex.  A better solution is simply to upgrade Flex to a newer version.
+      For more information on this issue for Apple users, 
+      <a href="http://lmgtfy.com/?q=FlexLexer.h+header+file+on+OS+X">LMGTFY</a>.  
+   </p>
+   <h3>The Flex Scanner</h3>
+   <p>
+      How the Flex scanner itself works is beyond the scope of this tutorial.  There are plenty of
+      references on how to get started with a scanner, especially in C.  There are lots of other
+      examples out there but I found that most require quite a bit of work to get going and are far 
+      from complete.  I based the example on some other Flex/Bison examples that create something 
+      similar to the Unix word count utility (<em>wc</em>). The language I used differs slightly 
+      from <em>wc</em> in the following respects: words are only alpha characters, numbers are 
+      simply counted as characters and I count upper and lower case characters.</p><p>
+   </p><h3>The Flex Scanner Code</h3>
+<p>
+<script src="./FlexBisonCplusplus_files/a4e540d06808484875f3.js"></script><link rel="stylesheet" href="https://assets-cdn.github.com/assets/gist/embed-43202ed1c0f246fbd258cfe72e45070a37befd58cd4e334a02a433b572d16b55.css"></p><div id="gist6390325" class="gist">
+    <div class="gist-file">
+      <div class="gist-data">
+        <div class="js-gist-file-update-container js-task-list-container file-box">
+  <div id="file-mc_scanner-l" class="file">
+    
+
+  <div class="blob-wrapper data type-lex">
+      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
+      <tbody><tr>
+        <td id="file-mc_scanner-l-L1" class="blob-num js-line-number" data-line-number="1"></td>
+        <td id="file-mc_scanner-l-LC1" class="blob-code blob-code-inner js-file-line">%{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L2" class="blob-num js-line-number" data-line-number="2"></td>
+        <td id="file-mc_scanner-l-LC2" class="blob-code blob-code-inner js-file-line">/* C++ string header, for string ops below */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L3" class="blob-num js-line-number" data-line-number="3"></td>
+        <td id="file-mc_scanner-l-LC3" class="blob-code blob-code-inner js-file-line">#include &lt;string&gt;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L4" class="blob-num js-line-number" data-line-number="4"></td>
+        <td id="file-mc_scanner-l-LC4" class="blob-code blob-code-inner js-file-line">/* Implementation of yyFlexScanner */ </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L5" class="blob-num js-line-number" data-line-number="5"></td>
+        <td id="file-mc_scanner-l-LC5" class="blob-code blob-code-inner js-file-line">#include "mc_scanner.hpp"</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L6" class="blob-num js-line-number" data-line-number="6"></td>
+        <td id="file-mc_scanner-l-LC6" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L7" class="blob-num js-line-number" data-line-number="7"></td>
+        <td id="file-mc_scanner-l-LC7" class="blob-code blob-code-inner js-file-line">/* typedef to make the returns for the tokens shorter */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L8" class="blob-num js-line-number" data-line-number="8"></td>
+        <td id="file-mc_scanner-l-LC8" class="blob-code blob-code-inner js-file-line">typedef MC::MC_Parser::token token;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L9" class="blob-num js-line-number" data-line-number="9"></td>
+        <td id="file-mc_scanner-l-LC9" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L10" class="blob-num js-line-number" data-line-number="10"></td>
+        <td id="file-mc_scanner-l-LC10" class="blob-code blob-code-inner js-file-line">/* define to keep from re-typing the same code over and over */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L11" class="blob-num js-line-number" data-line-number="11"></td>
+        <td id="file-mc_scanner-l-LC11" class="blob-code blob-code-inner js-file-line">#define STOKEN( x ) ( new std::string( x ) )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L12" class="blob-num js-line-number" data-line-number="12"></td>
+        <td id="file-mc_scanner-l-LC12" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L13" class="blob-num js-line-number" data-line-number="13"></td>
+        <td id="file-mc_scanner-l-LC13" class="blob-code blob-code-inner js-file-line">/* define yyterminate as this instead of NULL */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L14" class="blob-num js-line-number" data-line-number="14"></td>
+        <td id="file-mc_scanner-l-LC14" class="blob-code blob-code-inner js-file-line">#define yyterminate() return( token::END )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L15" class="blob-num js-line-number" data-line-number="15"></td>
+        <td id="file-mc_scanner-l-LC15" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L16" class="blob-num js-line-number" data-line-number="16"></td>
+        <td id="file-mc_scanner-l-LC16" class="blob-code blob-code-inner js-file-line">/* msvc2010 requires that we exclude this header file. */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L17" class="blob-num js-line-number" data-line-number="17"></td>
+        <td id="file-mc_scanner-l-LC17" class="blob-code blob-code-inner js-file-line">#define YY_NO_UNISTD_H</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L18" class="blob-num js-line-number" data-line-number="18"></td>
+        <td id="file-mc_scanner-l-LC18" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L19" class="blob-num js-line-number" data-line-number="19"></td>
+        <td id="file-mc_scanner-l-LC19" class="blob-code blob-code-inner js-file-line">%}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L20" class="blob-num js-line-number" data-line-number="20"></td>
+        <td id="file-mc_scanner-l-LC20" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L21" class="blob-num js-line-number" data-line-number="21"></td>
+        <td id="file-mc_scanner-l-LC21" class="blob-code blob-code-inner js-file-line">%option debug </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L22" class="blob-num js-line-number" data-line-number="22"></td>
+        <td id="file-mc_scanner-l-LC22" class="blob-code blob-code-inner js-file-line">%option nodefault </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L23" class="blob-num js-line-number" data-line-number="23"></td>
+        <td id="file-mc_scanner-l-LC23" class="blob-code blob-code-inner js-file-line">%option yyclass="MC_Scanner" </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L24" class="blob-num js-line-number" data-line-number="24"></td>
+        <td id="file-mc_scanner-l-LC24" class="blob-code blob-code-inner js-file-line">%option noyywrap </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L25" class="blob-num js-line-number" data-line-number="25"></td>
+        <td id="file-mc_scanner-l-LC25" class="blob-code blob-code-inner js-file-line">%option c++</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L26" class="blob-num js-line-number" data-line-number="26"></td>
+        <td id="file-mc_scanner-l-LC26" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L27" class="blob-num js-line-number" data-line-number="27"></td>
+        <td id="file-mc_scanner-l-LC27" class="blob-code blob-code-inner js-file-line">%%</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L28" class="blob-num js-line-number" data-line-number="28"></td>
+        <td id="file-mc_scanner-l-LC28" class="blob-code blob-code-inner js-file-line">[a-z]       { </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L29" class="blob-num js-line-number" data-line-number="29"></td>
+        <td id="file-mc_scanner-l-LC29" class="blob-code blob-code-inner js-file-line">               return( token::LOWER );     </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L30" class="blob-num js-line-number" data-line-number="30"></td>
+        <td id="file-mc_scanner-l-LC30" class="blob-code blob-code-inner js-file-line">            }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L31" class="blob-num js-line-number" data-line-number="31"></td>
+        <td id="file-mc_scanner-l-LC31" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L32" class="blob-num js-line-number" data-line-number="32"></td>
+        <td id="file-mc_scanner-l-LC32" class="blob-code blob-code-inner js-file-line">[A-Z]       { </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L33" class="blob-num js-line-number" data-line-number="33"></td>
+        <td id="file-mc_scanner-l-LC33" class="blob-code blob-code-inner js-file-line">               return( token::UPPER );     </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L34" class="blob-num js-line-number" data-line-number="34"></td>
+        <td id="file-mc_scanner-l-LC34" class="blob-code blob-code-inner js-file-line">            }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L35" class="blob-num js-line-number" data-line-number="35"></td>
+        <td id="file-mc_scanner-l-LC35" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L36" class="blob-num js-line-number" data-line-number="36"></td>
+        <td id="file-mc_scanner-l-LC36" class="blob-code blob-code-inner js-file-line">[a-zA-Z]+   { </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L37" class="blob-num js-line-number" data-line-number="37"></td>
+        <td id="file-mc_scanner-l-LC37" class="blob-code blob-code-inner js-file-line">               yylval-&gt;sval = STOKEN( yytext );  </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L38" class="blob-num js-line-number" data-line-number="38"></td>
+        <td id="file-mc_scanner-l-LC38" class="blob-code blob-code-inner js-file-line">               return( token::WORD );      </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L39" class="blob-num js-line-number" data-line-number="39"></td>
+        <td id="file-mc_scanner-l-LC39" class="blob-code blob-code-inner js-file-line">            }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L40" class="blob-num js-line-number" data-line-number="40"></td>
+        <td id="file-mc_scanner-l-LC40" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L41" class="blob-num js-line-number" data-line-number="41"></td>
+        <td id="file-mc_scanner-l-LC41" class="blob-code blob-code-inner js-file-line">\n          { </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L42" class="blob-num js-line-number" data-line-number="42"></td>
+        <td id="file-mc_scanner-l-LC42" class="blob-code blob-code-inner js-file-line">               return( token::NEWLINE );   </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L43" class="blob-num js-line-number" data-line-number="43"></td>
+        <td id="file-mc_scanner-l-LC43" class="blob-code blob-code-inner js-file-line">            }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L44" class="blob-num js-line-number" data-line-number="44"></td>
+        <td id="file-mc_scanner-l-LC44" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L45" class="blob-num js-line-number" data-line-number="45"></td>
+        <td id="file-mc_scanner-l-LC45" class="blob-code blob-code-inner js-file-line">.           { </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L46" class="blob-num js-line-number" data-line-number="46"></td>
+        <td id="file-mc_scanner-l-LC46" class="blob-code blob-code-inner js-file-line">               return( token::CHAR );      </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L47" class="blob-num js-line-number" data-line-number="47"></td>
+        <td id="file-mc_scanner-l-LC47" class="blob-code blob-code-inner js-file-line">            }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-l-L48" class="blob-num js-line-number" data-line-number="48"></td>
+        <td id="file-mc_scanner-l-LC48" class="blob-code blob-code-inner js-file-line">%%</td>
+      </tr>
+</tbody></table>
+
+  </div>
+
+  </div>
+  
+</div>
+
+      </div>
+      <div class="gist-meta">
+        <a href="https://gist.github.com/jonathan-beard/a4e540d06808484875f3/raw/57d23767dfb4c1bbea21e0b44405ee45333198ac/mc_scanner.l" style="float:right">view raw</a>
+        <a href="https://gist.github.com/jonathan-beard/a4e540d06808484875f3#file-mc_scanner-l">mc_scanner.l</a>
+        hosted with ❤ by <a href="https://github.com/">GitHub</a>
+      </div>
+    </div>
+</div>
+
+<p></p> <!-- END SCANNER CODE -->
+   <h4>A brief explanation of the scanner file</h4>
+   <p>
+   On line 3 the C++ string header file is included since we use it within this code.  The scanner header file (line 5) is included which
+   we'll talk about next extends <em>yyFlexLexer</em> found in <a href="http://www.jonathanbeard.io/tutorials/FlexLexer_H.html" target="_blank">FlexLexer.h</a>.  This is the scanner class itself.  Next you'll see
+   a typedef included simply to make the namespacing a bit shorter to type when returning tokens.  The STOKEN macro is defined
+   simply to make the repeated code to return a string pointer to <tt>yytext</tt> easier and clearer.  It's worth mentioning at this point
+   that <tt>yylval</tt> is now a pointer to a union, which differs from the C implementation.  The <tt>yylval</tt> is a private member variable of 
+   the sub-class scanner that we'll define shortly.  
+   </p>
+   <p>
+   On line 14 you'll notice that I've defined terminate, I would like it to be a token type instead of NULL so we define it before the code below
+   is read (from the generated file).  This way <em>yyterminate()</em> is already defined by the time the compiler reaches this point in the generated code so our version is in the compiled code and
+   not the default one.<br>
+   </p><pre id="vimCodeElement"><span class="LineNr">1 </span><span class="Comment">/*</span><span class="Comment"> No semi-colon after return; correct usage is to write "yyterminate();" -</span>
+<span class="LineNr">2 </span><span class="Comment"> * we don't want an extra ';' after the "return" because that will cause</span>
+<span class="LineNr">3 </span><span class="Comment"> * some compilers to complain about unreachable statements.</span>
+<span class="LineNr">4 </span><span class="Comment"> </span><span class="Comment">*/</span>
+<span class="LineNr">5 </span><span class="PreProc">#ifndef yyterminate</span>
+<span class="LineNr">6 </span><span class="PreProc">#define yyterminate() </span><span class="Statement">return</span><span class="PreProc"> YY_NULL</span>
+<span class="LineNr">7 </span><span class="PreProc">#endif</span>
+</pre>
+   <br>
+   Next you'll see that there are several options selected.  Most of these are self explanatory or are explained within the Flex documentation, however the
+   one's you don't want to miss are the <em>nodefault</em>, <em>yyclass=</em>, <em>noyywrap</em> and <em>c++</em> options.  The <em>yyclass</em> option indicates
+   what the scanner class is actually called.  This is the same class that is imported on line 3.
+   <p></p>
+   <h3>The Scanner Class Definition</h3>
+<p> <!-- begin scanner class code -->
+<script src="./FlexBisonCplusplus_files/684a899cb5e71c042acf.js"></script><link rel="stylesheet" href="https://assets-cdn.github.com/assets/gist/embed-43202ed1c0f246fbd258cfe72e45070a37befd58cd4e334a02a433b572d16b55.css"></p><div id="gist6390450" class="gist">
+    <div class="gist-file">
+      <div class="gist-data">
+        <div class="js-gist-file-update-container js-task-list-container file-box">
+  <div id="file-mc_scanner-hpp" class="file">
+    
+
+  <div class="blob-wrapper data type-c">
+      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
+      <tbody><tr>
+        <td id="file-mc_scanner-hpp-L1" class="blob-num js-line-number" data-line-number="1"></td>
+        <td id="file-mc_scanner-hpp-LC1" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">ifndef</span> __MCSCANNER_HPP__</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L2" class="blob-num js-line-number" data-line-number="2"></td>
+        <td id="file-mc_scanner-hpp-LC2" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">define</span> <span class="pl-en">__MCSCANNER_HPP__</span> <span class="pl-c1">1</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L3" class="blob-num js-line-number" data-line-number="3"></td>
+        <td id="file-mc_scanner-hpp-LC3" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L4" class="blob-num js-line-number" data-line-number="4"></td>
+        <td id="file-mc_scanner-hpp-LC4" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">if</span> ! defined(yyFlexLexerOnce)</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L5" class="blob-num js-line-number" data-line-number="5"></td>
+        <td id="file-mc_scanner-hpp-LC5" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>FlexLexer.h<span class="pl-pds">&gt;</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L6" class="blob-num js-line-number" data-line-number="6"></td>
+        <td id="file-mc_scanner-hpp-LC6" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">endif</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L7" class="blob-num js-line-number" data-line-number="7"></td>
+        <td id="file-mc_scanner-hpp-LC7" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L8" class="blob-num js-line-number" data-line-number="8"></td>
+        <td id="file-mc_scanner-hpp-LC8" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">undef</span>  YY_DECL</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L9" class="blob-num js-line-number" data-line-number="9"></td>
+        <td id="file-mc_scanner-hpp-LC9" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">define</span> <span class="pl-en">YY_DECL</span> <span class="pl-k">int</span>  <span class="pl-en">MC::MC_Scanner::yylex</span>()</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L10" class="blob-num js-line-number" data-line-number="10"></td>
+        <td id="file-mc_scanner-hpp-LC10" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L11" class="blob-num js-line-number" data-line-number="11"></td>
+        <td id="file-mc_scanner-hpp-LC11" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>mc_parser.tab.hh<span class="pl-pds">"</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L12" class="blob-num js-line-number" data-line-number="12"></td>
+        <td id="file-mc_scanner-hpp-LC12" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L13" class="blob-num js-line-number" data-line-number="13"></td>
+        <td id="file-mc_scanner-hpp-LC13" class="blob-code blob-code-inner js-file-line"><span class="pl-k">namespace</span> <span class="pl-en">MC</span>{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L14" class="blob-num js-line-number" data-line-number="14"></td>
+        <td id="file-mc_scanner-hpp-LC14" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L15" class="blob-num js-line-number" data-line-number="15"></td>
+        <td id="file-mc_scanner-hpp-LC15" class="blob-code blob-code-inner js-file-line"><span class="pl-k">class</span> <span class="pl-en">MC_Scanner</span> : <span class="pl-k">public</span> <span class="pl-en">yyFlexLexer</span>{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L16" class="blob-num js-line-number" data-line-number="16"></td>
+        <td id="file-mc_scanner-hpp-LC16" class="blob-code blob-code-inner js-file-line"><span class="pl-k">public:</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L17" class="blob-num js-line-number" data-line-number="17"></td>
+        <td id="file-mc_scanner-hpp-LC17" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L18" class="blob-num js-line-number" data-line-number="18"></td>
+        <td id="file-mc_scanner-hpp-LC18" class="blob-code blob-code-inner js-file-line">   <span class="pl-en">MC_Scanner</span>(std::istream *in) : yyFlexLexer(in),</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L19" class="blob-num js-line-number" data-line-number="19"></td>
+        <td id="file-mc_scanner-hpp-LC19" class="blob-code blob-code-inner js-file-line">                                  <span class="pl-en">yylval</span>( <span class="pl-v">nullptr</span> ){};</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L20" class="blob-num js-line-number" data-line-number="20"></td>
+        <td id="file-mc_scanner-hpp-LC20" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L21" class="blob-num js-line-number" data-line-number="21"></td>
+        <td id="file-mc_scanner-hpp-LC21" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">int</span> <span class="pl-en">yylex</span>(MC::MC_Parser::semantic_type *lval)</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L22" class="blob-num js-line-number" data-line-number="22"></td>
+        <td id="file-mc_scanner-hpp-LC22" class="blob-code blob-code-inner js-file-line">   {</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L23" class="blob-num js-line-number" data-line-number="23"></td>
+        <td id="file-mc_scanner-hpp-LC23" class="blob-code blob-code-inner js-file-line">      yylval = lval;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L24" class="blob-num js-line-number" data-line-number="24"></td>
+        <td id="file-mc_scanner-hpp-LC24" class="blob-code blob-code-inner js-file-line">      <span class="pl-k">return</span>( <span class="pl-c1">yylex</span>() ); </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L25" class="blob-num js-line-number" data-line-number="25"></td>
+        <td id="file-mc_scanner-hpp-LC25" class="blob-code blob-code-inner js-file-line">   }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L26" class="blob-num js-line-number" data-line-number="26"></td>
+        <td id="file-mc_scanner-hpp-LC26" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L27" class="blob-num js-line-number" data-line-number="27"></td>
+        <td id="file-mc_scanner-hpp-LC27" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L28" class="blob-num js-line-number" data-line-number="28"></td>
+        <td id="file-mc_scanner-hpp-LC28" class="blob-code blob-code-inner js-file-line"><span class="pl-k">private:</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L29" class="blob-num js-line-number" data-line-number="29"></td>
+        <td id="file-mc_scanner-hpp-LC29" class="blob-code blob-code-inner js-file-line">   <span class="pl-c">/* hide this one from public view */</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L30" class="blob-num js-line-number" data-line-number="30"></td>
+        <td id="file-mc_scanner-hpp-LC30" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">int</span> <span class="pl-en">yylex</span>();</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L31" class="blob-num js-line-number" data-line-number="31"></td>
+        <td id="file-mc_scanner-hpp-LC31" class="blob-code blob-code-inner js-file-line">   <span class="pl-c">/* yyval ptr */</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L32" class="blob-num js-line-number" data-line-number="32"></td>
+        <td id="file-mc_scanner-hpp-LC32" class="blob-code blob-code-inner js-file-line">   MC::MC_Parser::semantic_type *yylval;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L33" class="blob-num js-line-number" data-line-number="33"></td>
+        <td id="file-mc_scanner-hpp-LC33" class="blob-code blob-code-inner js-file-line">};</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L34" class="blob-num js-line-number" data-line-number="34"></td>
+        <td id="file-mc_scanner-hpp-LC34" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L35" class="blob-num js-line-number" data-line-number="35"></td>
+        <td id="file-mc_scanner-hpp-LC35" class="blob-code blob-code-inner js-file-line">} <span class="pl-c">/* end namespace MC */</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L36" class="blob-num js-line-number" data-line-number="36"></td>
+        <td id="file-mc_scanner-hpp-LC36" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_scanner-hpp-L37" class="blob-num js-line-number" data-line-number="37"></td>
+        <td id="file-mc_scanner-hpp-LC37" class="blob-code blob-code-inner js-file-line">#endif <span class="pl-c">/* END __MCSCANNER_HPP__ */</span></td>
+      </tr>
+</tbody></table>
+
+  </div>
+
+  </div>
+  
+</div>
+
+      </div>
+      <div class="gist-meta">
+        <a href="https://gist.github.com/jonathan-beard/684a899cb5e71c042acf/raw/bdf31cce149f2cec7b01a82293ef03d60fdde946/mc_scanner.hpp" style="float:right">view raw</a>
+        <a href="https://gist.github.com/jonathan-beard/684a899cb5e71c042acf#file-mc_scanner-hpp">mc_scanner.hpp</a>
+        hosted with ❤ by <a href="https://github.com/">GitHub</a>
+      </div>
+    </div>
+</div>
+
+<p></p> <!-- end scanner class code -->
+   <p>
+   Line 5 simply includes the <a href="http://www.jonathanbeard.io/tutorials/FlexLexer_H.html" target="_blank">FlexLexer.h</a> class that defines <em>yyFlexLexer</em>.  Line 8 undefines the default defined <em>yylex()</em> function and we
+   insert our own so the parser will have the correct one to call.  We then include the bison generated header file which includes
+   the token definitions.  The constructor is relatively straight forward, we simply call the <em>yyFlexLexer</em> constructor then we initialize
+   the private <em>yylval</em> pointer to <span class="Constant">nullptr</span>.  As the only function that we need to define in this simple example we have <em>yylex</em> which we defined
+   as <span class="PreProc">YY_DECL</span> earlier.  Just to show why we undefined <span class="PreProc">YY_DECL</span> here's a code snippet from the generated <em>lex.yy.cc</em>: <br>
+   </p><pre id="vimCodeElement"><span class="LineNr"> 1 </span><span class="Comment">/*</span><span class="Comment"> Default declaration of generated scanner - a define so the user can</span>
+<span class="LineNr"> 2 </span><span class="Comment"> * easily add parameters.</span>
+<span class="LineNr"> 3 </span><span class="Comment"> </span><span class="Comment">*/</span>
+<span class="LineNr"> 4 </span><span class="PreProc">#ifndef YY_DECL</span>
+<span class="LineNr"> 5 </span><span class="PreProc">#define YY_DECL_IS_OURS </span><span class="Constant">1</span>
+<span class="LineNr"> 6 </span><span class="Comment">/*</span><span class="Comment"> %if-c-only Standard (non-C++) definition </span><span class="Comment">*/</span>
+<span class="LineNr"> 7 </span><span class="Comment">/*</span><span class="Comment"> %endif </span><span class="Comment">*/</span>
+<span class="LineNr"> 8 </span><span class="Comment">/*</span><span class="Comment"> %if-c++-only C++ definition </span><span class="Comment">*/</span>
+<span class="LineNr"> 9 </span><span class="PreProc">#define YY_DECL </span><span class="Type">int</span><span class="PreProc"> yyFlexLexer::yylex()</span>
+<span class="LineNr">10 </span><span class="Comment">/*</span><span class="Comment"> %endif </span><span class="Comment">*/</span>
+<span class="LineNr">11 </span><span class="PreProc">#endif</span> <span class="Comment">/*</span><span class="Comment"> !YY_DECL </span><span class="Comment">*/</span>
+</pre><br>
+By defining <span class="PreProc">YY_DECL</span> we get rid of the native one.  That pretty much concludes the scanner portion, on to the parser stuff.
+   <p></p>
+   <h3>The Bison C++ Parser File</h3>
+   <p> <!-- Begin Bison parser code -->
+<script src="./FlexBisonCplusplus_files/8d6e18619d1067bbb5f7.js"></script><link rel="stylesheet" href="https://assets-cdn.github.com/assets/gist/embed-43202ed1c0f246fbd258cfe72e45070a37befd58cd4e334a02a433b572d16b55.css"></p><div id="gist6390308" class="gist">
+    <div class="gist-file">
+      <div class="gist-data">
+        <div class="js-gist-file-update-container js-task-list-container file-box">
+  <div id="file-mc_parser-yy" class="file">
+    
+
+  <div class="blob-wrapper data type-yacc">
+      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
+      <tbody><tr>
+        <td id="file-mc_parser-yy-L1" class="blob-num js-line-number" data-line-number="1"></td>
+        <td id="file-mc_parser-yy-LC1" class="blob-code blob-code-inner js-file-line">%skeleton "lalr1.cc"</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L2" class="blob-num js-line-number" data-line-number="2"></td>
+        <td id="file-mc_parser-yy-LC2" class="blob-code blob-code-inner js-file-line">%require  "3.0"</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L3" class="blob-num js-line-number" data-line-number="3"></td>
+        <td id="file-mc_parser-yy-LC3" class="blob-code blob-code-inner js-file-line">%debug </td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L4" class="blob-num js-line-number" data-line-number="4"></td>
+        <td id="file-mc_parser-yy-LC4" class="blob-code blob-code-inner js-file-line">%defines </td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L5" class="blob-num js-line-number" data-line-number="5"></td>
+        <td id="file-mc_parser-yy-LC5" class="blob-code blob-code-inner js-file-line">%define api.namespace {MC}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L6" class="blob-num js-line-number" data-line-number="6"></td>
+        <td id="file-mc_parser-yy-LC6" class="blob-code blob-code-inner js-file-line">%define parser_class_name {MC_Parser}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L7" class="blob-num js-line-number" data-line-number="7"></td>
+        <td id="file-mc_parser-yy-LC7" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L8" class="blob-num js-line-number" data-line-number="8"></td>
+        <td id="file-mc_parser-yy-LC8" class="blob-code blob-code-inner js-file-line">%code requires{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L9" class="blob-num js-line-number" data-line-number="9"></td>
+        <td id="file-mc_parser-yy-LC9" class="blob-code blob-code-inner js-file-line">   namespace MC {</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L10" class="blob-num js-line-number" data-line-number="10"></td>
+        <td id="file-mc_parser-yy-LC10" class="blob-code blob-code-inner js-file-line">      class MC_Driver;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L11" class="blob-num js-line-number" data-line-number="11"></td>
+        <td id="file-mc_parser-yy-LC11" class="blob-code blob-code-inner js-file-line">      class MC_Scanner;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L12" class="blob-num js-line-number" data-line-number="12"></td>
+        <td id="file-mc_parser-yy-LC12" class="blob-code blob-code-inner js-file-line">   }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L13" class="blob-num js-line-number" data-line-number="13"></td>
+        <td id="file-mc_parser-yy-LC13" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L14" class="blob-num js-line-number" data-line-number="14"></td>
+        <td id="file-mc_parser-yy-LC14" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L15" class="blob-num js-line-number" data-line-number="15"></td>
+        <td id="file-mc_parser-yy-LC15" class="blob-code blob-code-inner js-file-line">%lex-param   { MC_Scanner  &amp;scanner  }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L16" class="blob-num js-line-number" data-line-number="16"></td>
+        <td id="file-mc_parser-yy-LC16" class="blob-code blob-code-inner js-file-line">%parse-param { MC_Scanner  &amp;scanner  }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L17" class="blob-num js-line-number" data-line-number="17"></td>
+        <td id="file-mc_parser-yy-LC17" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L18" class="blob-num js-line-number" data-line-number="18"></td>
+        <td id="file-mc_parser-yy-LC18" class="blob-code blob-code-inner js-file-line">%lex-param   { MC_Driver  &amp;driver  }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L19" class="blob-num js-line-number" data-line-number="19"></td>
+        <td id="file-mc_parser-yy-LC19" class="blob-code blob-code-inner js-file-line">%parse-param { MC_Driver  &amp;driver  }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L20" class="blob-num js-line-number" data-line-number="20"></td>
+        <td id="file-mc_parser-yy-LC20" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L21" class="blob-num js-line-number" data-line-number="21"></td>
+        <td id="file-mc_parser-yy-LC21" class="blob-code blob-code-inner js-file-line">%code{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L22" class="blob-num js-line-number" data-line-number="22"></td>
+        <td id="file-mc_parser-yy-LC22" class="blob-code blob-code-inner js-file-line">   #include &lt;iostream&gt;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L23" class="blob-num js-line-number" data-line-number="23"></td>
+        <td id="file-mc_parser-yy-LC23" class="blob-code blob-code-inner js-file-line">   #include &lt;cstdlib&gt;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L24" class="blob-num js-line-number" data-line-number="24"></td>
+        <td id="file-mc_parser-yy-LC24" class="blob-code blob-code-inner js-file-line">   #include &lt;fstream&gt;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L25" class="blob-num js-line-number" data-line-number="25"></td>
+        <td id="file-mc_parser-yy-LC25" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L26" class="blob-num js-line-number" data-line-number="26"></td>
+        <td id="file-mc_parser-yy-LC26" class="blob-code blob-code-inner js-file-line">   /* include for all driver functions */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L27" class="blob-num js-line-number" data-line-number="27"></td>
+        <td id="file-mc_parser-yy-LC27" class="blob-code blob-code-inner js-file-line">   #include "mc_driver.hpp"</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L28" class="blob-num js-line-number" data-line-number="28"></td>
+        <td id="file-mc_parser-yy-LC28" class="blob-code blob-code-inner js-file-line">  </td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L29" class="blob-num js-line-number" data-line-number="29"></td>
+        <td id="file-mc_parser-yy-LC29" class="blob-code blob-code-inner js-file-line">   /* this is silly, but I can't figure out a way around */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L30" class="blob-num js-line-number" data-line-number="30"></td>
+        <td id="file-mc_parser-yy-LC30" class="blob-code blob-code-inner js-file-line">   static int yylex(MC::MC_Parser::semantic_type *yylval,</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L31" class="blob-num js-line-number" data-line-number="31"></td>
+        <td id="file-mc_parser-yy-LC31" class="blob-code blob-code-inner js-file-line">                    MC::MC_Scanner  &amp;scanner,</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L32" class="blob-num js-line-number" data-line-number="32"></td>
+        <td id="file-mc_parser-yy-LC32" class="blob-code blob-code-inner js-file-line">                    MC::MC_Driver   &amp;driver);</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L33" class="blob-num js-line-number" data-line-number="33"></td>
+        <td id="file-mc_parser-yy-LC33" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L34" class="blob-num js-line-number" data-line-number="34"></td>
+        <td id="file-mc_parser-yy-LC34" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L35" class="blob-num js-line-number" data-line-number="35"></td>
+        <td id="file-mc_parser-yy-LC35" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L36" class="blob-num js-line-number" data-line-number="36"></td>
+        <td id="file-mc_parser-yy-LC36" class="blob-code blob-code-inner js-file-line">/* token types */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L37" class="blob-num js-line-number" data-line-number="37"></td>
+        <td id="file-mc_parser-yy-LC37" class="blob-code blob-code-inner js-file-line">%union {</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L38" class="blob-num js-line-number" data-line-number="38"></td>
+        <td id="file-mc_parser-yy-LC38" class="blob-code blob-code-inner js-file-line">   std::string *sval;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L39" class="blob-num js-line-number" data-line-number="39"></td>
+        <td id="file-mc_parser-yy-LC39" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L40" class="blob-num js-line-number" data-line-number="40"></td>
+        <td id="file-mc_parser-yy-LC40" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L41" class="blob-num js-line-number" data-line-number="41"></td>
+        <td id="file-mc_parser-yy-LC41" class="blob-code blob-code-inner js-file-line">%token            END    0     "end of file"</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L42" class="blob-num js-line-number" data-line-number="42"></td>
+        <td id="file-mc_parser-yy-LC42" class="blob-code blob-code-inner js-file-line">%token            UPPER</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L43" class="blob-num js-line-number" data-line-number="43"></td>
+        <td id="file-mc_parser-yy-LC43" class="blob-code blob-code-inner js-file-line">%token            LOWER</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L44" class="blob-num js-line-number" data-line-number="44"></td>
+        <td id="file-mc_parser-yy-LC44" class="blob-code blob-code-inner js-file-line">%token   &lt;sval&gt;   WORD</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L45" class="blob-num js-line-number" data-line-number="45"></td>
+        <td id="file-mc_parser-yy-LC45" class="blob-code blob-code-inner js-file-line">%token            NEWLINE</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L46" class="blob-num js-line-number" data-line-number="46"></td>
+        <td id="file-mc_parser-yy-LC46" class="blob-code blob-code-inner js-file-line">%token            CHAR</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L47" class="blob-num js-line-number" data-line-number="47"></td>
+        <td id="file-mc_parser-yy-LC47" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L48" class="blob-num js-line-number" data-line-number="48"></td>
+        <td id="file-mc_parser-yy-LC48" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L49" class="blob-num js-line-number" data-line-number="49"></td>
+        <td id="file-mc_parser-yy-LC49" class="blob-code blob-code-inner js-file-line">/* destructor rule for &lt;sval&gt; objects */</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L50" class="blob-num js-line-number" data-line-number="50"></td>
+        <td id="file-mc_parser-yy-LC50" class="blob-code blob-code-inner js-file-line">%destructor { if ($$)  { delete ($$); ($$) = nullptr; } } &lt;sval&gt;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L51" class="blob-num js-line-number" data-line-number="51"></td>
+        <td id="file-mc_parser-yy-LC51" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L52" class="blob-num js-line-number" data-line-number="52"></td>
+        <td id="file-mc_parser-yy-LC52" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L53" class="blob-num js-line-number" data-line-number="53"></td>
+        <td id="file-mc_parser-yy-LC53" class="blob-code blob-code-inner js-file-line">%%</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L54" class="blob-num js-line-number" data-line-number="54"></td>
+        <td id="file-mc_parser-yy-LC54" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L55" class="blob-num js-line-number" data-line-number="55"></td>
+        <td id="file-mc_parser-yy-LC55" class="blob-code blob-code-inner js-file-line">list_option : END | list END;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L56" class="blob-num js-line-number" data-line-number="56"></td>
+        <td id="file-mc_parser-yy-LC56" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L57" class="blob-num js-line-number" data-line-number="57"></td>
+        <td id="file-mc_parser-yy-LC57" class="blob-code blob-code-inner js-file-line">list</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L58" class="blob-num js-line-number" data-line-number="58"></td>
+        <td id="file-mc_parser-yy-LC58" class="blob-code blob-code-inner js-file-line">  : item</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L59" class="blob-num js-line-number" data-line-number="59"></td>
+        <td id="file-mc_parser-yy-LC59" class="blob-code blob-code-inner js-file-line">  | list item</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L60" class="blob-num js-line-number" data-line-number="60"></td>
+        <td id="file-mc_parser-yy-LC60" class="blob-code blob-code-inner js-file-line">  ;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L61" class="blob-num js-line-number" data-line-number="61"></td>
+        <td id="file-mc_parser-yy-LC61" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L62" class="blob-num js-line-number" data-line-number="62"></td>
+        <td id="file-mc_parser-yy-LC62" class="blob-code blob-code-inner js-file-line">item</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L63" class="blob-num js-line-number" data-line-number="63"></td>
+        <td id="file-mc_parser-yy-LC63" class="blob-code blob-code-inner js-file-line">  : UPPER   { driver.<span class="pl-c1">add_upper</span>(); }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L64" class="blob-num js-line-number" data-line-number="64"></td>
+        <td id="file-mc_parser-yy-LC64" class="blob-code blob-code-inner js-file-line">  | LOWER   { driver.<span class="pl-c1">add_lower</span>(); }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L65" class="blob-num js-line-number" data-line-number="65"></td>
+        <td id="file-mc_parser-yy-LC65" class="blob-code blob-code-inner js-file-line">  | WORD    { driver.<span class="pl-c1">add_word</span>( *$1 ); }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L66" class="blob-num js-line-number" data-line-number="66"></td>
+        <td id="file-mc_parser-yy-LC66" class="blob-code blob-code-inner js-file-line">  | NEWLINE { driver.<span class="pl-c1">add_newline</span>(); }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L67" class="blob-num js-line-number" data-line-number="67"></td>
+        <td id="file-mc_parser-yy-LC67" class="blob-code blob-code-inner js-file-line">  | CHAR    { driver.<span class="pl-c1">add_char</span>(); }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L68" class="blob-num js-line-number" data-line-number="68"></td>
+        <td id="file-mc_parser-yy-LC68" class="blob-code blob-code-inner js-file-line">  ;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L69" class="blob-num js-line-number" data-line-number="69"></td>
+        <td id="file-mc_parser-yy-LC69" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L70" class="blob-num js-line-number" data-line-number="70"></td>
+        <td id="file-mc_parser-yy-LC70" class="blob-code blob-code-inner js-file-line">%%</td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L71" class="blob-num js-line-number" data-line-number="71"></td>
+        <td id="file-mc_parser-yy-LC71" class="blob-code blob-code-inner js-file-line"><span class="pl-s1"></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L72" class="blob-num js-line-number" data-line-number="72"></td>
+        <td id="file-mc_parser-yy-LC72" class="blob-code blob-code-inner js-file-line"><span class="pl-s1"></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L73" class="blob-num js-line-number" data-line-number="73"></td>
+        <td id="file-mc_parser-yy-LC73" class="blob-code blob-code-inner js-file-line"><span class="pl-s1"><span class="pl-k">void</span> </span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L74" class="blob-num js-line-number" data-line-number="74"></td>
+        <td id="file-mc_parser-yy-LC74" class="blob-code blob-code-inner js-file-line"><span class="pl-s1"><span class="pl-en">MC::MC_Parser::error</span>( const std::string &amp;err_message )</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L75" class="blob-num js-line-number" data-line-number="75"></td>
+        <td id="file-mc_parser-yy-LC75" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">{</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L76" class="blob-num js-line-number" data-line-number="76"></td>
+        <td id="file-mc_parser-yy-LC76" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">   std::cerr &lt;&lt; "Error: " &lt;&lt; err_message &lt;&lt; "\n"; </span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L77" class="blob-num js-line-number" data-line-number="77"></td>
+        <td id="file-mc_parser-yy-LC77" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">}</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L78" class="blob-num js-line-number" data-line-number="78"></td>
+        <td id="file-mc_parser-yy-LC78" class="blob-code blob-code-inner js-file-line"><span class="pl-s1"></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L79" class="blob-num js-line-number" data-line-number="79"></td>
+        <td id="file-mc_parser-yy-LC79" class="blob-code blob-code-inner js-file-line"><span class="pl-s1"></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L80" class="blob-num js-line-number" data-line-number="80"></td>
+        <td id="file-mc_parser-yy-LC80" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">/* include for access to scanner.yylex */</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L81" class="blob-num js-line-number" data-line-number="81"></td>
+        <td id="file-mc_parser-yy-LC81" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">#include "mc_scanner.hpp"</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L82" class="blob-num js-line-number" data-line-number="82"></td>
+        <td id="file-mc_parser-yy-LC82" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">static int </span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L83" class="blob-num js-line-number" data-line-number="83"></td>
+        <td id="file-mc_parser-yy-LC83" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">yylex( MC::MC_Parser::semantic_type *yylval,</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L84" class="blob-num js-line-number" data-line-number="84"></td>
+        <td id="file-mc_parser-yy-LC84" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">       MC::MC_Scanner  &amp;scanner,</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L85" class="blob-num js-line-number" data-line-number="85"></td>
+        <td id="file-mc_parser-yy-LC85" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">       MC::MC_Driver   &amp;driver )</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L86" class="blob-num js-line-number" data-line-number="86"></td>
+        <td id="file-mc_parser-yy-LC86" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">{</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L87" class="blob-num js-line-number" data-line-number="87"></td>
+        <td id="file-mc_parser-yy-LC87" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">   return( scanner.yylex(yylval) );</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_parser-yy-L88" class="blob-num js-line-number" data-line-number="88"></td>
+        <td id="file-mc_parser-yy-LC88" class="blob-code blob-code-inner js-file-line"><span class="pl-s1">}</span></td>
+      </tr>
+</tbody></table>
+
+  </div>
+
+  </div>
+  
+</div>
+
+      </div>
+      <div class="gist-meta">
+        <a href="https://gist.github.com/jonathan-beard/8d6e18619d1067bbb5f7/raw/65b4465f576557ecf6d50848dcb16ac50934fada/mc_parser.yy" style="float:right">view raw</a>
+        <a href="https://gist.github.com/jonathan-beard/8d6e18619d1067bbb5f7#file-mc_parser-yy">mc_parser.yy</a>
+        hosted with ❤ by <a href="https://github.com/">GitHub</a>
+      </div>
+    </div>
+</div>
+
+<p></p> <!-- End Bison parser code -->
+   <p>
+   Exactly how to write a language, and express it such that the parser can parse it is definitely beyond the scope of this tutorial, there are plenty of books
+   on how to do this.  Here is just a simple description of how to define the C++ parser.  The first line declares that we want to use the <em>lalr1</em> skeleton file (if you want to learn what types of skeletons are available,
+   the documentation does a fairly good job going through them).  We then include the required version of Bison (for this example version 3.0+, however you can download an example that works with 
+   version 2.5 through 2.7 here: <a href="https://github.com/jonathan-beard/simple_wc_example/archive/1.1.zip" target="_blank">link</a>).  There's a bit of new syntax which is the reason for the version
+   differentiation.  
+   The debug option is set on line 3.  The namespace that we want this parser to use is defined 
+   on line 5 along with the parser class on line 6 (Note: its usually a good idea to have a unique namespace and a parser name so when you have multiple
+   parsers they can be kept very distinct).  On line 8 the classes that are used within the parser are defined, think of this as a forward declaration.  
+   Lines 15 through 20 are probably the most important as they define what will be given to the parser when its instantiated and upon calls to <em>yylex</em>.  There's quite a few more options that can be given to Bison, some of those for version 3.0 are listed here (<a href="http://www.gnu.org/software/bison/manual/bison.html#Declarations" target="_blank">Bison Docs</a>).
+   Here's a snippet from the generated parser header to show our parser constructor <em>mc_parser.tab.hh</em>:<br>
+   </p><pre id="vimCodeElement"><span class="LineNr">1 </span><span class="Comment">/// Build a parser object.</span>
+<span class="LineNr">2 </span>MC_Parser (MC_Scanner  &amp;scanner_yyarg, MC_Driver  &amp;driver_yyarg);
+</pre>
+   <br>
+   Reference to both the passed in driver and scanner are kept as private members of the parser class.  Within the code section we have all
+   the rest of the information that our code will need to compile, include the requisite C++ headers, the driver class that we'll get to 
+   shortly.  We also define a static <em>yylex</em> function that'll be called within the bison parse function that takes the parameters that were
+   defined on lines 15 - 20.  This function will call the scanner's <em>yylex</em> function, any other behavior need can be defined here.  Next we
+   have the simple language which differs from the way the actual <em>wc</em> functions in the manner mentioned in the intro.  Last the error function and the static <em>yylex</em>
+   function is defined.
+   <p></p>
+   <h3>The Driver Header File</h3>
+   <p> <!-- begin driver header code -->
+<script src="./FlexBisonCplusplus_files/db0975934a913300a974.js"></script><link rel="stylesheet" href="https://assets-cdn.github.com/assets/gist/embed-43202ed1c0f246fbd258cfe72e45070a37befd58cd4e334a02a433b572d16b55.css"></p><div id="gist6390357" class="gist">
+    <div class="gist-file">
+      <div class="gist-data">
+        <div class="js-gist-file-update-container js-task-list-container file-box">
+  <div id="file-mc_driver-hpp" class="file">
+    
+
+  <div class="blob-wrapper data type-c">
+      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
+      <tbody><tr>
+        <td id="file-mc_driver-hpp-L1" class="blob-num js-line-number" data-line-number="1"></td>
+        <td id="file-mc_driver-hpp-LC1" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">ifndef</span> __MCDRIVER_HPP__</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L2" class="blob-num js-line-number" data-line-number="2"></td>
+        <td id="file-mc_driver-hpp-LC2" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">define</span> <span class="pl-en">__MCDRIVER_HPP__</span> <span class="pl-c1">1</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L3" class="blob-num js-line-number" data-line-number="3"></td>
+        <td id="file-mc_driver-hpp-LC3" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L4" class="blob-num js-line-number" data-line-number="4"></td>
+        <td id="file-mc_driver-hpp-LC4" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>string<span class="pl-pds">&gt;</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L5" class="blob-num js-line-number" data-line-number="5"></td>
+        <td id="file-mc_driver-hpp-LC5" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>mc_scanner.hpp<span class="pl-pds">"</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L6" class="blob-num js-line-number" data-line-number="6"></td>
+        <td id="file-mc_driver-hpp-LC6" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>mc_parser.tab.hh<span class="pl-pds">"</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L7" class="blob-num js-line-number" data-line-number="7"></td>
+        <td id="file-mc_driver-hpp-LC7" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L8" class="blob-num js-line-number" data-line-number="8"></td>
+        <td id="file-mc_driver-hpp-LC8" class="blob-code blob-code-inner js-file-line"><span class="pl-k">namespace</span> <span class="pl-en">MC</span>{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L9" class="blob-num js-line-number" data-line-number="9"></td>
+        <td id="file-mc_driver-hpp-LC9" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L10" class="blob-num js-line-number" data-line-number="10"></td>
+        <td id="file-mc_driver-hpp-LC10" class="blob-code blob-code-inner js-file-line"><span class="pl-k">class</span> <span class="pl-en">MC_Driver</span>{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L11" class="blob-num js-line-number" data-line-number="11"></td>
+        <td id="file-mc_driver-hpp-LC11" class="blob-code blob-code-inner js-file-line"><span class="pl-k">public:</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L12" class="blob-num js-line-number" data-line-number="12"></td>
+        <td id="file-mc_driver-hpp-LC12" class="blob-code blob-code-inner js-file-line">   <span class="pl-en">MC_Driver</span>() : chars(<span class="pl-c1">0</span>),</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L13" class="blob-num js-line-number" data-line-number="13"></td>
+        <td id="file-mc_driver-hpp-LC13" class="blob-code blob-code-inner js-file-line">                 <span class="pl-en">words</span>(<span class="pl-c1">0</span>),</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L14" class="blob-num js-line-number" data-line-number="14"></td>
+        <td id="file-mc_driver-hpp-LC14" class="blob-code blob-code-inner js-file-line">                 lines(<span class="pl-c1">0</span>),</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L15" class="blob-num js-line-number" data-line-number="15"></td>
+        <td id="file-mc_driver-hpp-LC15" class="blob-code blob-code-inner js-file-line">                 uppercase(<span class="pl-c1">0</span>),</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L16" class="blob-num js-line-number" data-line-number="16"></td>
+        <td id="file-mc_driver-hpp-LC16" class="blob-code blob-code-inner js-file-line">                 lowercase(<span class="pl-c1">0</span>),</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L17" class="blob-num js-line-number" data-line-number="17"></td>
+        <td id="file-mc_driver-hpp-LC17" class="blob-code blob-code-inner js-file-line">                 parser( <span class="pl-v">nullptr</span> ),</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L18" class="blob-num js-line-number" data-line-number="18"></td>
+        <td id="file-mc_driver-hpp-LC18" class="blob-code blob-code-inner js-file-line">                 scanner( <span class="pl-v">nullptr</span> ){};</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L19" class="blob-num js-line-number" data-line-number="19"></td>
+        <td id="file-mc_driver-hpp-LC19" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L20" class="blob-num js-line-number" data-line-number="20"></td>
+        <td id="file-mc_driver-hpp-LC20" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">virtual</span> <span class="pl-en">~MC_Driver</span>();</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L21" class="blob-num js-line-number" data-line-number="21"></td>
+        <td id="file-mc_driver-hpp-LC21" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L22" class="blob-num js-line-number" data-line-number="22"></td>
+        <td id="file-mc_driver-hpp-LC22" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">void</span> <span class="pl-en">parse</span>( <span class="pl-k">const</span> <span class="pl-k">char</span> *filename );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L23" class="blob-num js-line-number" data-line-number="23"></td>
+        <td id="file-mc_driver-hpp-LC23" class="blob-code blob-code-inner js-file-line">  </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L24" class="blob-num js-line-number" data-line-number="24"></td>
+        <td id="file-mc_driver-hpp-LC24" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L25" class="blob-num js-line-number" data-line-number="25"></td>
+        <td id="file-mc_driver-hpp-LC25" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">void</span> <span class="pl-en">add_upper</span>();</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L26" class="blob-num js-line-number" data-line-number="26"></td>
+        <td id="file-mc_driver-hpp-LC26" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">void</span> <span class="pl-en">add_lower</span>();</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L27" class="blob-num js-line-number" data-line-number="27"></td>
+        <td id="file-mc_driver-hpp-LC27" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">void</span> <span class="pl-en">add_word</span>( <span class="pl-k">const</span> std::string &amp;word );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L28" class="blob-num js-line-number" data-line-number="28"></td>
+        <td id="file-mc_driver-hpp-LC28" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">void</span> <span class="pl-en">add_newline</span>();</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L29" class="blob-num js-line-number" data-line-number="29"></td>
+        <td id="file-mc_driver-hpp-LC29" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">void</span> <span class="pl-en">add_char</span>();</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L30" class="blob-num js-line-number" data-line-number="30"></td>
+        <td id="file-mc_driver-hpp-LC30" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L31" class="blob-num js-line-number" data-line-number="31"></td>
+        <td id="file-mc_driver-hpp-LC31" class="blob-code blob-code-inner js-file-line">   std::ostream&amp; <span class="pl-en">print</span>(std::ostream &amp;stream);</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L32" class="blob-num js-line-number" data-line-number="32"></td>
+        <td id="file-mc_driver-hpp-LC32" class="blob-code blob-code-inner js-file-line"><span class="pl-k">private:</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L33" class="blob-num js-line-number" data-line-number="33"></td>
+        <td id="file-mc_driver-hpp-LC33" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">int</span> chars;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L34" class="blob-num js-line-number" data-line-number="34"></td>
+        <td id="file-mc_driver-hpp-LC34" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">int</span> words;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L35" class="blob-num js-line-number" data-line-number="35"></td>
+        <td id="file-mc_driver-hpp-LC35" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">int</span> lines;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L36" class="blob-num js-line-number" data-line-number="36"></td>
+        <td id="file-mc_driver-hpp-LC36" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">int</span> uppercase;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L37" class="blob-num js-line-number" data-line-number="37"></td>
+        <td id="file-mc_driver-hpp-LC37" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">int</span> lowercase;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L38" class="blob-num js-line-number" data-line-number="38"></td>
+        <td id="file-mc_driver-hpp-LC38" class="blob-code blob-code-inner js-file-line">   MC::MC_Parser *parser;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L39" class="blob-num js-line-number" data-line-number="39"></td>
+        <td id="file-mc_driver-hpp-LC39" class="blob-code blob-code-inner js-file-line">   MC::MC_Scanner *scanner;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L40" class="blob-num js-line-number" data-line-number="40"></td>
+        <td id="file-mc_driver-hpp-LC40" class="blob-code blob-code-inner js-file-line">};</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L41" class="blob-num js-line-number" data-line-number="41"></td>
+        <td id="file-mc_driver-hpp-LC41" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L42" class="blob-num js-line-number" data-line-number="42"></td>
+        <td id="file-mc_driver-hpp-LC42" class="blob-code blob-code-inner js-file-line">} <span class="pl-c">/* end namespace MC */</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-hpp-L43" class="blob-num js-line-number" data-line-number="43"></td>
+        <td id="file-mc_driver-hpp-LC43" class="blob-code blob-code-inner js-file-line">#endif <span class="pl-c">/* END __MCDRIVER_HPP__ */</span></td>
+      </tr>
+</tbody></table>
+
+  </div>
+
+  </div>
+  
+</div>
+
+      </div>
+      <div class="gist-meta">
+        <a href="https://gist.github.com/jonathan-beard/db0975934a913300a974/raw/b1250569865e69f63e0b198f38bdf239897d9778/mc_driver.hpp" style="float:right">view raw</a>
+        <a href="https://gist.github.com/jonathan-beard/db0975934a913300a974#file-mc_driver-hpp">mc_driver.hpp</a>
+        hosted with ❤ by <a href="https://github.com/">GitHub</a>
+      </div>
+    </div>
+</div>
+
+
+<p></p> <!-- end driver header code -->
+   <h3>The Driver Implementation</h3>
+   <p> <!-- begin driver implementation -->
+<script src="./FlexBisonCplusplus_files/8c486b9b588eb335e34e.js"></script><link rel="stylesheet" href="https://assets-cdn.github.com/assets/gist/embed-43202ed1c0f246fbd258cfe72e45070a37befd58cd4e334a02a433b572d16b55.css"></p><div id="gist6390365" class="gist">
+    <div class="gist-file">
+      <div class="gist-data">
+        <div class="js-gist-file-update-container js-task-list-container file-box">
+  <div id="file-mc_driver-cpp" class="file">
+    
+
+  <div class="blob-wrapper data type-c">
+      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
+      <tbody><tr>
+        <td id="file-mc_driver-cpp-L1" class="blob-num js-line-number" data-line-number="1"></td>
+        <td id="file-mc_driver-cpp-LC1" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>cctype<span class="pl-pds">&gt;</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L2" class="blob-num js-line-number" data-line-number="2"></td>
+        <td id="file-mc_driver-cpp-LC2" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>fstream<span class="pl-pds">&gt;</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L3" class="blob-num js-line-number" data-line-number="3"></td>
+        <td id="file-mc_driver-cpp-LC3" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>cassert<span class="pl-pds">&gt;</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L4" class="blob-num js-line-number" data-line-number="4"></td>
+        <td id="file-mc_driver-cpp-LC4" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L5" class="blob-num js-line-number" data-line-number="5"></td>
+        <td id="file-mc_driver-cpp-LC5" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>mc_driver.hpp<span class="pl-pds">"</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L6" class="blob-num js-line-number" data-line-number="6"></td>
+        <td id="file-mc_driver-cpp-LC6" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L7" class="blob-num js-line-number" data-line-number="7"></td>
+        <td id="file-mc_driver-cpp-LC7" class="blob-code blob-code-inner js-file-line"><span class="pl-en">MC::MC_Driver::~MC_Driver</span>(){ </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L8" class="blob-num js-line-number" data-line-number="8"></td>
+        <td id="file-mc_driver-cpp-LC8" class="blob-code blob-code-inner js-file-line">   <span class="pl-c1">delete</span>(scanner);</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L9" class="blob-num js-line-number" data-line-number="9"></td>
+        <td id="file-mc_driver-cpp-LC9" class="blob-code blob-code-inner js-file-line">   scanner = <span class="pl-v">nullptr</span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L10" class="blob-num js-line-number" data-line-number="10"></td>
+        <td id="file-mc_driver-cpp-LC10" class="blob-code blob-code-inner js-file-line">   <span class="pl-c1">delete</span>(parser);</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L11" class="blob-num js-line-number" data-line-number="11"></td>
+        <td id="file-mc_driver-cpp-LC11" class="blob-code blob-code-inner js-file-line">   parser = <span class="pl-v">nullptr</span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L12" class="blob-num js-line-number" data-line-number="12"></td>
+        <td id="file-mc_driver-cpp-LC12" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L13" class="blob-num js-line-number" data-line-number="13"></td>
+        <td id="file-mc_driver-cpp-LC13" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L14" class="blob-num js-line-number" data-line-number="14"></td>
+        <td id="file-mc_driver-cpp-LC14" class="blob-code blob-code-inner js-file-line"><span class="pl-k">void</span> </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L15" class="blob-num js-line-number" data-line-number="15"></td>
+        <td id="file-mc_driver-cpp-LC15" class="blob-code blob-code-inner js-file-line"><span class="pl-en">MC::MC_Driver::parse</span>( <span class="pl-k">const</span> <span class="pl-k">char</span> *filename )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L16" class="blob-num js-line-number" data-line-number="16"></td>
+        <td id="file-mc_driver-cpp-LC16" class="blob-code blob-code-inner js-file-line">{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L17" class="blob-num js-line-number" data-line-number="17"></td>
+        <td id="file-mc_driver-cpp-LC17" class="blob-code blob-code-inner js-file-line">   <span class="pl-c1">assert</span>( filename != <span class="pl-v">nullptr</span> );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L18" class="blob-num js-line-number" data-line-number="18"></td>
+        <td id="file-mc_driver-cpp-LC18" class="blob-code blob-code-inner js-file-line">   std::ifstream <span class="pl-smi">in_file</span>( filename );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L19" class="blob-num js-line-number" data-line-number="19"></td>
+        <td id="file-mc_driver-cpp-LC19" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">if</span>( ! in_file.<span class="pl-c1">good</span>() ) <span class="pl-c1">exit</span>( EXIT_FAILURE );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L20" class="blob-num js-line-number" data-line-number="20"></td>
+        <td id="file-mc_driver-cpp-LC20" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L21" class="blob-num js-line-number" data-line-number="21"></td>
+        <td id="file-mc_driver-cpp-LC21" class="blob-code blob-code-inner js-file-line">   <span class="pl-c1">delete</span>(scanner);</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L22" class="blob-num js-line-number" data-line-number="22"></td>
+        <td id="file-mc_driver-cpp-LC22" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">try</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L23" class="blob-num js-line-number" data-line-number="23"></td>
+        <td id="file-mc_driver-cpp-LC23" class="blob-code blob-code-inner js-file-line">   {</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L24" class="blob-num js-line-number" data-line-number="24"></td>
+        <td id="file-mc_driver-cpp-LC24" class="blob-code blob-code-inner js-file-line">      scanner = <span class="pl-k">new</span> <span class="pl-c1">MC::MC_Scanner</span>( &amp;in_file );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L25" class="blob-num js-line-number" data-line-number="25"></td>
+        <td id="file-mc_driver-cpp-LC25" class="blob-code blob-code-inner js-file-line">   }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L26" class="blob-num js-line-number" data-line-number="26"></td>
+        <td id="file-mc_driver-cpp-LC26" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">catch</span>( std::bad_alloc &amp;ba )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L27" class="blob-num js-line-number" data-line-number="27"></td>
+        <td id="file-mc_driver-cpp-LC27" class="blob-code blob-code-inner js-file-line">   {</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L28" class="blob-num js-line-number" data-line-number="28"></td>
+        <td id="file-mc_driver-cpp-LC28" class="blob-code blob-code-inner js-file-line">      std::cerr &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Failed to allocate scanner: (<span class="pl-pds">"</span></span> &lt;&lt;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L29" class="blob-num js-line-number" data-line-number="29"></td>
+        <td id="file-mc_driver-cpp-LC29" class="blob-code blob-code-inner js-file-line">         ba.<span class="pl-c1">what</span>() &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>), exiting!!<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L30" class="blob-num js-line-number" data-line-number="30"></td>
+        <td id="file-mc_driver-cpp-LC30" class="blob-code blob-code-inner js-file-line">      <span class="pl-c1">exit</span>( EXIT_FAILURE );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L31" class="blob-num js-line-number" data-line-number="31"></td>
+        <td id="file-mc_driver-cpp-LC31" class="blob-code blob-code-inner js-file-line">   }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L32" class="blob-num js-line-number" data-line-number="32"></td>
+        <td id="file-mc_driver-cpp-LC32" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L33" class="blob-num js-line-number" data-line-number="33"></td>
+        <td id="file-mc_driver-cpp-LC33" class="blob-code blob-code-inner js-file-line">   <span class="pl-c1">delete</span>(parser); </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L34" class="blob-num js-line-number" data-line-number="34"></td>
+        <td id="file-mc_driver-cpp-LC34" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">try</span></td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L35" class="blob-num js-line-number" data-line-number="35"></td>
+        <td id="file-mc_driver-cpp-LC35" class="blob-code blob-code-inner js-file-line">   {</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L36" class="blob-num js-line-number" data-line-number="36"></td>
+        <td id="file-mc_driver-cpp-LC36" class="blob-code blob-code-inner js-file-line">      parser = <span class="pl-k">new</span> <span class="pl-c1">MC::MC_Parser</span>( (*scanner) <span class="pl-c">/* scanner */</span>, </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L37" class="blob-num js-line-number" data-line-number="37"></td>
+        <td id="file-mc_driver-cpp-LC37" class="blob-code blob-code-inner js-file-line">                                  (*<span class="pl-v">this</span>) <span class="pl-c">/* driver */</span> );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L38" class="blob-num js-line-number" data-line-number="38"></td>
+        <td id="file-mc_driver-cpp-LC38" class="blob-code blob-code-inner js-file-line">   }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L39" class="blob-num js-line-number" data-line-number="39"></td>
+        <td id="file-mc_driver-cpp-LC39" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">catch</span>( std::bad_alloc &amp;ba )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L40" class="blob-num js-line-number" data-line-number="40"></td>
+        <td id="file-mc_driver-cpp-LC40" class="blob-code blob-code-inner js-file-line">   {</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L41" class="blob-num js-line-number" data-line-number="41"></td>
+        <td id="file-mc_driver-cpp-LC41" class="blob-code blob-code-inner js-file-line">      std::cerr &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Failed to allocate parser: (<span class="pl-pds">"</span></span> &lt;&lt; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L42" class="blob-num js-line-number" data-line-number="42"></td>
+        <td id="file-mc_driver-cpp-LC42" class="blob-code blob-code-inner js-file-line">         ba.<span class="pl-c1">what</span>() &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>), exiting!!<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L43" class="blob-num js-line-number" data-line-number="43"></td>
+        <td id="file-mc_driver-cpp-LC43" class="blob-code blob-code-inner js-file-line">      <span class="pl-c1">exit</span>( EXIT_FAILURE );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L44" class="blob-num js-line-number" data-line-number="44"></td>
+        <td id="file-mc_driver-cpp-LC44" class="blob-code blob-code-inner js-file-line">   }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L45" class="blob-num js-line-number" data-line-number="45"></td>
+        <td id="file-mc_driver-cpp-LC45" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">const</span> <span class="pl-k">int</span> <span class="pl-smi">accept</span>( <span class="pl-c1">0</span> );</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L46" class="blob-num js-line-number" data-line-number="46"></td>
+        <td id="file-mc_driver-cpp-LC46" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">if</span>( parser-&gt;<span class="pl-c1">parse</span>() != accept )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L47" class="blob-num js-line-number" data-line-number="47"></td>
+        <td id="file-mc_driver-cpp-LC47" class="blob-code blob-code-inner js-file-line">   {</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L48" class="blob-num js-line-number" data-line-number="48"></td>
+        <td id="file-mc_driver-cpp-LC48" class="blob-code blob-code-inner js-file-line">      std::cerr &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Parse failed!!<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L49" class="blob-num js-line-number" data-line-number="49"></td>
+        <td id="file-mc_driver-cpp-LC49" class="blob-code blob-code-inner js-file-line">   }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L50" class="blob-num js-line-number" data-line-number="50"></td>
+        <td id="file-mc_driver-cpp-LC50" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L51" class="blob-num js-line-number" data-line-number="51"></td>
+        <td id="file-mc_driver-cpp-LC51" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L52" class="blob-num js-line-number" data-line-number="52"></td>
+        <td id="file-mc_driver-cpp-LC52" class="blob-code blob-code-inner js-file-line"><span class="pl-k">void</span> </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L53" class="blob-num js-line-number" data-line-number="53"></td>
+        <td id="file-mc_driver-cpp-LC53" class="blob-code blob-code-inner js-file-line"><span class="pl-en">MC::MC_Driver::add_upper</span>()</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L54" class="blob-num js-line-number" data-line-number="54"></td>
+        <td id="file-mc_driver-cpp-LC54" class="blob-code blob-code-inner js-file-line">{ </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L55" class="blob-num js-line-number" data-line-number="55"></td>
+        <td id="file-mc_driver-cpp-LC55" class="blob-code blob-code-inner js-file-line">   uppercase++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L56" class="blob-num js-line-number" data-line-number="56"></td>
+        <td id="file-mc_driver-cpp-LC56" class="blob-code blob-code-inner js-file-line">   chars++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L57" class="blob-num js-line-number" data-line-number="57"></td>
+        <td id="file-mc_driver-cpp-LC57" class="blob-code blob-code-inner js-file-line">   words++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L58" class="blob-num js-line-number" data-line-number="58"></td>
+        <td id="file-mc_driver-cpp-LC58" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L59" class="blob-num js-line-number" data-line-number="59"></td>
+        <td id="file-mc_driver-cpp-LC59" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L60" class="blob-num js-line-number" data-line-number="60"></td>
+        <td id="file-mc_driver-cpp-LC60" class="blob-code blob-code-inner js-file-line"><span class="pl-k">void</span> </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L61" class="blob-num js-line-number" data-line-number="61"></td>
+        <td id="file-mc_driver-cpp-LC61" class="blob-code blob-code-inner js-file-line"><span class="pl-en">MC::MC_Driver::add_lower</span>()</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L62" class="blob-num js-line-number" data-line-number="62"></td>
+        <td id="file-mc_driver-cpp-LC62" class="blob-code blob-code-inner js-file-line">{ </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L63" class="blob-num js-line-number" data-line-number="63"></td>
+        <td id="file-mc_driver-cpp-LC63" class="blob-code blob-code-inner js-file-line">   lowercase++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L64" class="blob-num js-line-number" data-line-number="64"></td>
+        <td id="file-mc_driver-cpp-LC64" class="blob-code blob-code-inner js-file-line">   chars++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L65" class="blob-num js-line-number" data-line-number="65"></td>
+        <td id="file-mc_driver-cpp-LC65" class="blob-code blob-code-inner js-file-line">   words++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L66" class="blob-num js-line-number" data-line-number="66"></td>
+        <td id="file-mc_driver-cpp-LC66" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L67" class="blob-num js-line-number" data-line-number="67"></td>
+        <td id="file-mc_driver-cpp-LC67" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L68" class="blob-num js-line-number" data-line-number="68"></td>
+        <td id="file-mc_driver-cpp-LC68" class="blob-code blob-code-inner js-file-line"><span class="pl-k">void</span> </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L69" class="blob-num js-line-number" data-line-number="69"></td>
+        <td id="file-mc_driver-cpp-LC69" class="blob-code blob-code-inner js-file-line"><span class="pl-en">MC::MC_Driver::add_word</span>( <span class="pl-k">const</span> std::string &amp;word )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L70" class="blob-num js-line-number" data-line-number="70"></td>
+        <td id="file-mc_driver-cpp-LC70" class="blob-code blob-code-inner js-file-line">{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L71" class="blob-num js-line-number" data-line-number="71"></td>
+        <td id="file-mc_driver-cpp-LC71" class="blob-code blob-code-inner js-file-line">   words++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L72" class="blob-num js-line-number" data-line-number="72"></td>
+        <td id="file-mc_driver-cpp-LC72" class="blob-code blob-code-inner js-file-line">   chars += word.<span class="pl-c1">length</span>();</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L73" class="blob-num js-line-number" data-line-number="73"></td>
+        <td id="file-mc_driver-cpp-LC73" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">for</span>(<span class="pl-k">const</span> <span class="pl-k">char</span> &amp;c : word ){</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L74" class="blob-num js-line-number" data-line-number="74"></td>
+        <td id="file-mc_driver-cpp-LC74" class="blob-code blob-code-inner js-file-line">      <span class="pl-k">if</span>( <span class="pl-c1">islower</span>( c ) )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L75" class="blob-num js-line-number" data-line-number="75"></td>
+        <td id="file-mc_driver-cpp-LC75" class="blob-code blob-code-inner js-file-line">      { </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L76" class="blob-num js-line-number" data-line-number="76"></td>
+        <td id="file-mc_driver-cpp-LC76" class="blob-code blob-code-inner js-file-line">         lowercase++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L77" class="blob-num js-line-number" data-line-number="77"></td>
+        <td id="file-mc_driver-cpp-LC77" class="blob-code blob-code-inner js-file-line">      }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L78" class="blob-num js-line-number" data-line-number="78"></td>
+        <td id="file-mc_driver-cpp-LC78" class="blob-code blob-code-inner js-file-line">      <span class="pl-k">else</span> <span class="pl-k">if</span> ( <span class="pl-c1">isupper</span>( c ) ) </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L79" class="blob-num js-line-number" data-line-number="79"></td>
+        <td id="file-mc_driver-cpp-LC79" class="blob-code blob-code-inner js-file-line">      { </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L80" class="blob-num js-line-number" data-line-number="80"></td>
+        <td id="file-mc_driver-cpp-LC80" class="blob-code blob-code-inner js-file-line">         uppercase++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L81" class="blob-num js-line-number" data-line-number="81"></td>
+        <td id="file-mc_driver-cpp-LC81" class="blob-code blob-code-inner js-file-line">      }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L82" class="blob-num js-line-number" data-line-number="82"></td>
+        <td id="file-mc_driver-cpp-LC82" class="blob-code blob-code-inner js-file-line">   }</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L83" class="blob-num js-line-number" data-line-number="83"></td>
+        <td id="file-mc_driver-cpp-LC83" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L84" class="blob-num js-line-number" data-line-number="84"></td>
+        <td id="file-mc_driver-cpp-LC84" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L85" class="blob-num js-line-number" data-line-number="85"></td>
+        <td id="file-mc_driver-cpp-LC85" class="blob-code blob-code-inner js-file-line"><span class="pl-k">void</span> </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L86" class="blob-num js-line-number" data-line-number="86"></td>
+        <td id="file-mc_driver-cpp-LC86" class="blob-code blob-code-inner js-file-line"><span class="pl-en">MC::MC_Driver::add_newline</span>()</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L87" class="blob-num js-line-number" data-line-number="87"></td>
+        <td id="file-mc_driver-cpp-LC87" class="blob-code blob-code-inner js-file-line">{ </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L88" class="blob-num js-line-number" data-line-number="88"></td>
+        <td id="file-mc_driver-cpp-LC88" class="blob-code blob-code-inner js-file-line">   lines++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L89" class="blob-num js-line-number" data-line-number="89"></td>
+        <td id="file-mc_driver-cpp-LC89" class="blob-code blob-code-inner js-file-line">   chars++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L90" class="blob-num js-line-number" data-line-number="90"></td>
+        <td id="file-mc_driver-cpp-LC90" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L91" class="blob-num js-line-number" data-line-number="91"></td>
+        <td id="file-mc_driver-cpp-LC91" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L92" class="blob-num js-line-number" data-line-number="92"></td>
+        <td id="file-mc_driver-cpp-LC92" class="blob-code blob-code-inner js-file-line"><span class="pl-k">void</span> </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L93" class="blob-num js-line-number" data-line-number="93"></td>
+        <td id="file-mc_driver-cpp-LC93" class="blob-code blob-code-inner js-file-line"><span class="pl-en">MC::MC_Driver::add_char</span>()</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L94" class="blob-num js-line-number" data-line-number="94"></td>
+        <td id="file-mc_driver-cpp-LC94" class="blob-code blob-code-inner js-file-line">{ </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L95" class="blob-num js-line-number" data-line-number="95"></td>
+        <td id="file-mc_driver-cpp-LC95" class="blob-code blob-code-inner js-file-line">   chars++; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L96" class="blob-num js-line-number" data-line-number="96"></td>
+        <td id="file-mc_driver-cpp-LC96" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L97" class="blob-num js-line-number" data-line-number="97"></td>
+        <td id="file-mc_driver-cpp-LC97" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L98" class="blob-num js-line-number" data-line-number="98"></td>
+        <td id="file-mc_driver-cpp-LC98" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L99" class="blob-num js-line-number" data-line-number="99"></td>
+        <td id="file-mc_driver-cpp-LC99" class="blob-code blob-code-inner js-file-line">std::ostream&amp; </td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L100" class="blob-num js-line-number" data-line-number="100"></td>
+        <td id="file-mc_driver-cpp-LC100" class="blob-code blob-code-inner js-file-line"><span class="pl-en">MC::MC_Driver::print</span>( std::ostream &amp;stream )</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L101" class="blob-num js-line-number" data-line-number="101"></td>
+        <td id="file-mc_driver-cpp-LC101" class="blob-code blob-code-inner js-file-line">{</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L102" class="blob-num js-line-number" data-line-number="102"></td>
+        <td id="file-mc_driver-cpp-LC102" class="blob-code blob-code-inner js-file-line">   stream &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Uppercase: <span class="pl-pds">"</span></span> &lt;&lt; uppercase &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L103" class="blob-num js-line-number" data-line-number="103"></td>
+        <td id="file-mc_driver-cpp-LC103" class="blob-code blob-code-inner js-file-line">   stream &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Lowercase: <span class="pl-pds">"</span></span> &lt;&lt; lowercase &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L104" class="blob-num js-line-number" data-line-number="104"></td>
+        <td id="file-mc_driver-cpp-LC104" class="blob-code blob-code-inner js-file-line">   stream &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Lines: <span class="pl-pds">"</span></span> &lt;&lt; lines &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L105" class="blob-num js-line-number" data-line-number="105"></td>
+        <td id="file-mc_driver-cpp-LC105" class="blob-code blob-code-inner js-file-line">   stream &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Words: <span class="pl-pds">"</span></span> &lt;&lt; words &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L106" class="blob-num js-line-number" data-line-number="106"></td>
+        <td id="file-mc_driver-cpp-LC106" class="blob-code blob-code-inner js-file-line">   stream &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Characters: <span class="pl-pds">"</span></span> &lt;&lt; chars &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L107" class="blob-num js-line-number" data-line-number="107"></td>
+        <td id="file-mc_driver-cpp-LC107" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">return</span>(stream);</td>
+      </tr>
+      <tr>
+        <td id="file-mc_driver-cpp-L108" class="blob-num js-line-number" data-line-number="108"></td>
+        <td id="file-mc_driver-cpp-LC108" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+</tbody></table>
+
+  </div>
+
+  </div>
+  
+</div>
+
+      </div>
+      <div class="gist-meta">
+        <a href="https://gist.github.com/jonathan-beard/8c486b9b588eb335e34e/raw/ab513a31ef4aa3ea56b24ba625f6e408a856acad/mc_driver.cpp" style="float:right">view raw</a>
+        <a href="https://gist.github.com/jonathan-beard/8c486b9b588eb335e34e#file-mc_driver-cpp">mc_driver.cpp</a>
+        hosted with ❤ by <a href="https://github.com/">GitHub</a>
+      </div>
+    </div>
+</div>
+
+<p></p> <!--end driver implementation -->
+   <p>
+   All thats left is to define a main class to instantiate everything and a Makefile to run
+   the compilation from the command line (invoked by typing make in the source code directory).
+   </p>
+   <h3>The Main Function</h3>
+   <p>
+<script src="./FlexBisonCplusplus_files/d5c10d44d3578af3b82d.js"></script><link rel="stylesheet" href="https://assets-cdn.github.com/assets/gist/embed-43202ed1c0f246fbd258cfe72e45070a37befd58cd4e334a02a433b572d16b55.css"></p><div id="gist6390374" class="gist">
+    <div class="gist-file">
+      <div class="gist-data">
+        <div class="js-gist-file-update-container js-task-list-container file-box">
+  <div id="file-main-cpp" class="file">
+    
+
+  <div class="blob-wrapper data type-c">
+      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
+      <tbody><tr>
+        <td id="file-main-cpp-L1" class="blob-num js-line-number" data-line-number="1"></td>
+        <td id="file-main-cpp-LC1" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>iostream<span class="pl-pds">&gt;</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L2" class="blob-num js-line-number" data-line-number="2"></td>
+        <td id="file-main-cpp-LC2" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>cstdlib<span class="pl-pds">&gt;</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L3" class="blob-num js-line-number" data-line-number="3"></td>
+        <td id="file-main-cpp-LC3" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L4" class="blob-num js-line-number" data-line-number="4"></td>
+        <td id="file-main-cpp-LC4" class="blob-code blob-code-inner js-file-line">#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">"</span>mc_driver.hpp<span class="pl-pds">"</span></span></td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L5" class="blob-num js-line-number" data-line-number="5"></td>
+        <td id="file-main-cpp-LC5" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L6" class="blob-num js-line-number" data-line-number="6"></td>
+        <td id="file-main-cpp-LC6" class="blob-code blob-code-inner js-file-line"><span class="pl-k">int</span> </td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L7" class="blob-num js-line-number" data-line-number="7"></td>
+        <td id="file-main-cpp-LC7" class="blob-code blob-code-inner js-file-line"><span class="pl-en">main</span>(<span class="pl-k">const</span> <span class="pl-k">int</span> argc, <span class="pl-k">const</span> <span class="pl-k">char</span> **argv)</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L8" class="blob-num js-line-number" data-line-number="8"></td>
+        <td id="file-main-cpp-LC8" class="blob-code blob-code-inner js-file-line">{</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L9" class="blob-num js-line-number" data-line-number="9"></td>
+        <td id="file-main-cpp-LC9" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">if</span>(argc != <span class="pl-c1">2</span> ) </td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L10" class="blob-num js-line-number" data-line-number="10"></td>
+        <td id="file-main-cpp-LC10" class="blob-code blob-code-inner js-file-line">      <span class="pl-k">return</span> ( EXIT_FAILURE );</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L11" class="blob-num js-line-number" data-line-number="11"></td>
+        <td id="file-main-cpp-LC11" class="blob-code blob-code-inner js-file-line">   MC::MC_Driver driver;</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L12" class="blob-num js-line-number" data-line-number="12"></td>
+        <td id="file-main-cpp-LC12" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L13" class="blob-num js-line-number" data-line-number="13"></td>
+        <td id="file-main-cpp-LC13" class="blob-code blob-code-inner js-file-line">   driver.<span class="pl-c1">parse</span>( argv[<span class="pl-c1">1</span>] );</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L14" class="blob-num js-line-number" data-line-number="14"></td>
+        <td id="file-main-cpp-LC14" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L15" class="blob-num js-line-number" data-line-number="15"></td>
+        <td id="file-main-cpp-LC15" class="blob-code blob-code-inner js-file-line">   std::cout &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span>Results<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L16" class="blob-num js-line-number" data-line-number="16"></td>
+        <td id="file-main-cpp-LC16" class="blob-code blob-code-inner js-file-line">   </td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L17" class="blob-num js-line-number" data-line-number="17"></td>
+        <td id="file-main-cpp-LC17" class="blob-code blob-code-inner js-file-line">   driver.<span class="pl-c1">print</span>(std::cout) &lt;&lt; <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\n</span><span class="pl-pds">"</span></span>;</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L18" class="blob-num js-line-number" data-line-number="18"></td>
+        <td id="file-main-cpp-LC18" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L19" class="blob-num js-line-number" data-line-number="19"></td>
+        <td id="file-main-cpp-LC19" class="blob-code blob-code-inner js-file-line">   <span class="pl-k">return</span>( EXIT_SUCCESS );</td>
+      </tr>
+      <tr>
+        <td id="file-main-cpp-L20" class="blob-num js-line-number" data-line-number="20"></td>
+        <td id="file-main-cpp-LC20" class="blob-code blob-code-inner js-file-line">}</td>
+      </tr>
+</tbody></table>
+
+  </div>
+
+  </div>
+  
+</div>
+
+      </div>
+      <div class="gist-meta">
+        <a href="https://gist.github.com/jonathan-beard/d5c10d44d3578af3b82d/raw/9fb83796e12446a723a5adb8410fcef55a0ac06c/main.cpp" style="float:right">view raw</a>
+        <a href="https://gist.github.com/jonathan-beard/d5c10d44d3578af3b82d#file-main-cpp">main.cpp</a>
+        hosted with ❤ by <a href="https://github.com/">GitHub</a>
+      </div>
+    </div>
+</div>
+
+   <p></p>
+   <h3>The Makefile</h3>
+   <p>
+<script src="./FlexBisonCplusplus_files/17393a7224f927e034b6.js"></script><link rel="stylesheet" href="https://assets-cdn.github.com/assets/gist/embed-43202ed1c0f246fbd258cfe72e45070a37befd58cd4e334a02a433b572d16b55.css"></p><div id="gist6390384" class="gist">
+    <div class="gist-file">
+      <div class="gist-data">
+        <div class="js-gist-file-update-container js-task-list-container file-box">
+  <div id="file-makefile" class="file">
+    
+
+  <div class="blob-wrapper data type-makefile">
+      <table class="highlight tab-size js-file-line-container" data-tab-size="8">
+      <tbody><tr>
+        <td id="file-makefile-L1" class="blob-num js-line-number" data-line-number="1"></td>
+        <td id="file-makefile-LC1" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CC</span>    ?= clang</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L2" class="blob-num js-line-number" data-line-number="2"></td>
+        <td id="file-makefile-LC2" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CXX</span>   ?= clang++</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L3" class="blob-num js-line-number" data-line-number="3"></td>
+        <td id="file-makefile-LC3" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L4" class="blob-num js-line-number" data-line-number="4"></td>
+        <td id="file-makefile-LC4" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">EXE</span> = my_wc</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L5" class="blob-num js-line-number" data-line-number="5"></td>
+        <td id="file-makefile-LC5" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L6" class="blob-num js-line-number" data-line-number="6"></td>
+        <td id="file-makefile-LC6" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CDEBUG</span> = -g -Wall</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L7" class="blob-num js-line-number" data-line-number="7"></td>
+        <td id="file-makefile-LC7" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L8" class="blob-num js-line-number" data-line-number="8"></td>
+        <td id="file-makefile-LC8" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CXXDEBUG</span> = -g -Wall</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L9" class="blob-num js-line-number" data-line-number="9"></td>
+        <td id="file-makefile-LC9" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L10" class="blob-num js-line-number" data-line-number="10"></td>
+        <td id="file-makefile-LC10" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CSTD</span> = -std=c99</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L11" class="blob-num js-line-number" data-line-number="11"></td>
+        <td id="file-makefile-LC11" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CXXSTD</span> = -std=c++11</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L12" class="blob-num js-line-number" data-line-number="12"></td>
+        <td id="file-makefile-LC12" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L13" class="blob-num js-line-number" data-line-number="13"></td>
+        <td id="file-makefile-LC13" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CFLAGS</span> = -O0  <span class="pl-s">$(<span class="pl-smi">CDEBUG</span>)</span> <span class="pl-s">$(<span class="pl-smi">CSTD</span>)</span> </td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L14" class="blob-num js-line-number" data-line-number="14"></td>
+        <td id="file-makefile-LC14" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CXXFLAGS</span> = -O0  <span class="pl-s">$(<span class="pl-smi">CXXDEBUG</span>)</span> <span class="pl-s">$(<span class="pl-smi">CXXSTD</span>)</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L15" class="blob-num js-line-number" data-line-number="15"></td>
+        <td id="file-makefile-LC15" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L16" class="blob-num js-line-number" data-line-number="16"></td>
+        <td id="file-makefile-LC16" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L17" class="blob-num js-line-number" data-line-number="17"></td>
+        <td id="file-makefile-LC17" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CPPOBJ</span> = main mc_driver</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L18" class="blob-num js-line-number" data-line-number="18"></td>
+        <td id="file-makefile-LC18" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">SOBJ</span> =  parser lexer</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L19" class="blob-num js-line-number" data-line-number="19"></td>
+        <td id="file-makefile-LC19" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L20" class="blob-num js-line-number" data-line-number="20"></td>
+        <td id="file-makefile-LC20" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">FILES</span> = <span class="pl-s">$(<span class="pl-smi">addsuffix .cpp, <span class="pl-s">$(<span class="pl-smi">CPPOBJ</span>)</span></span>)</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L21" class="blob-num js-line-number" data-line-number="21"></td>
+        <td id="file-makefile-LC21" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L22" class="blob-num js-line-number" data-line-number="22"></td>
+        <td id="file-makefile-LC22" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">OBJS</span>  = <span class="pl-s">$(<span class="pl-smi">addsuffix .o, <span class="pl-s">$(<span class="pl-smi">CPPOBJ</span>)</span></span>)</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L23" class="blob-num js-line-number" data-line-number="23"></td>
+        <td id="file-makefile-LC23" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L24" class="blob-num js-line-number" data-line-number="24"></td>
+        <td id="file-makefile-LC24" class="blob-code blob-code-inner js-file-line"><span class="pl-smi">CLEANLIST</span> =  <span class="pl-s">$(<span class="pl-smi">addsuffix .o, <span class="pl-s">$(<span class="pl-smi">OBJ</span>)</span></span>)</span> <span class="pl-s">$(<span class="pl-smi">OBJS</span>)</span> <span class="pl-cce">\</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L25" class="blob-num js-line-number" data-line-number="25"></td>
+        <td id="file-makefile-LC25" class="blob-code blob-code-inner js-file-line">    			 mc_parser.tab.cc mc_parser.tab.hh <span class="pl-cce">\</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L26" class="blob-num js-line-number" data-line-number="26"></td>
+        <td id="file-makefile-LC26" class="blob-code blob-code-inner js-file-line">				 location.hh position.hh <span class="pl-cce">\</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L27" class="blob-num js-line-number" data-line-number="27"></td>
+        <td id="file-makefile-LC27" class="blob-code blob-code-inner js-file-line">			    stack.hh mc_parser.output parser.o <span class="pl-cce">\</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L28" class="blob-num js-line-number" data-line-number="28"></td>
+        <td id="file-makefile-LC28" class="blob-code blob-code-inner js-file-line">				 lexer.o mc_lexer.yy.cc <span class="pl-s">$(<span class="pl-smi">EXE</span>)</span><span class="pl-cce">\</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L29" class="blob-num js-line-number" data-line-number="29"></td>
+        <td id="file-makefile-LC29" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L30" class="blob-num js-line-number" data-line-number="30"></td>
+        <td id="file-makefile-LC30" class="blob-code blob-code-inner js-file-line"><span class="pl-c1">.PHONY</span>: all</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L31" class="blob-num js-line-number" data-line-number="31"></td>
+        <td id="file-makefile-LC31" class="blob-code blob-code-inner js-file-line"><span class="pl-en">all</span>: wc</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L32" class="blob-num js-line-number" data-line-number="32"></td>
+        <td id="file-makefile-LC32" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L33" class="blob-num js-line-number" data-line-number="33"></td>
+        <td id="file-makefile-LC33" class="blob-code blob-code-inner js-file-line"><span class="pl-en">wc</span>: <span class="pl-s">$(<span class="pl-smi">FILES</span>)</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L34" class="blob-num js-line-number" data-line-number="34"></td>
+        <td id="file-makefile-LC34" class="blob-code blob-code-inner js-file-line">	<span class="pl-s">$(<span class="pl-v">MAKE</span>)</span> <span class="pl-s">$(<span class="pl-smi">SOBJ</span>)</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L35" class="blob-num js-line-number" data-line-number="35"></td>
+        <td id="file-makefile-LC35" class="blob-code blob-code-inner js-file-line">	<span class="pl-s">$(<span class="pl-v">MAKE</span>)</span> <span class="pl-s">$(<span class="pl-smi">OBJS</span>)</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L36" class="blob-num js-line-number" data-line-number="36"></td>
+        <td id="file-makefile-LC36" class="blob-code blob-code-inner js-file-line">	<span class="pl-s">$(<span class="pl-smi">CXX</span>)</span> <span class="pl-s">$(<span class="pl-smi">CXXFLAGS</span>)</span> -o <span class="pl-s">$(<span class="pl-smi">EXE</span>)</span> <span class="pl-s">$(<span class="pl-smi">OBJS</span>)</span> parser.o lexer.o <span class="pl-s">$(<span class="pl-smi">LIBS</span>)</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L37" class="blob-num js-line-number" data-line-number="37"></td>
+        <td id="file-makefile-LC37" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L38" class="blob-num js-line-number" data-line-number="38"></td>
+        <td id="file-makefile-LC38" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L39" class="blob-num js-line-number" data-line-number="39"></td>
+        <td id="file-makefile-LC39" class="blob-code blob-code-inner js-file-line"><span class="pl-en">parser</span>: mc_parser.yy</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L40" class="blob-num js-line-number" data-line-number="40"></td>
+        <td id="file-makefile-LC40" class="blob-code blob-code-inner js-file-line">	bison -d -v mc_parser.yy</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L41" class="blob-num js-line-number" data-line-number="41"></td>
+        <td id="file-makefile-LC41" class="blob-code blob-code-inner js-file-line">	<span class="pl-s">$(<span class="pl-smi">CXX</span>)</span> <span class="pl-s">$(<span class="pl-smi">CXXFLAGS</span>)</span> -c -o parser.o mc_parser.tab.cc</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L42" class="blob-num js-line-number" data-line-number="42"></td>
+        <td id="file-makefile-LC42" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L43" class="blob-num js-line-number" data-line-number="43"></td>
+        <td id="file-makefile-LC43" class="blob-code blob-code-inner js-file-line"><span class="pl-en">lexer</span>: mc_lexer.l</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L44" class="blob-num js-line-number" data-line-number="44"></td>
+        <td id="file-makefile-LC44" class="blob-code blob-code-inner js-file-line">	flex --outfile=mc_lexer.yy.cc  <span class="pl-v">$&lt;</span></td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L45" class="blob-num js-line-number" data-line-number="45"></td>
+        <td id="file-makefile-LC45" class="blob-code blob-code-inner js-file-line">	<span class="pl-s">$(<span class="pl-smi">CXX</span>)</span>  <span class="pl-s">$(<span class="pl-smi">CXXFLAGS</span>)</span> -c mc_lexer.yy.cc -o lexer.o</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L46" class="blob-num js-line-number" data-line-number="46"></td>
+        <td id="file-makefile-LC46" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L47" class="blob-num js-line-number" data-line-number="47"></td>
+        <td id="file-makefile-LC47" class="blob-code blob-code-inner js-file-line">
+</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L48" class="blob-num js-line-number" data-line-number="48"></td>
+        <td id="file-makefile-LC48" class="blob-code blob-code-inner js-file-line"><span class="pl-c1">.PHONY</span>: clean</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L49" class="blob-num js-line-number" data-line-number="49"></td>
+        <td id="file-makefile-LC49" class="blob-code blob-code-inner js-file-line"><span class="pl-en">clean</span>:</td>
+      </tr>
+      <tr>
+        <td id="file-makefile-L50" class="blob-num js-line-number" data-line-number="50"></td>
+        <td id="file-makefile-LC50" class="blob-code blob-code-inner js-file-line">	rm -rf <span class="pl-s">$(<span class="pl-smi">CLEANLIST</span>)</span></td>
+      </tr>
+</tbody></table>
+
+  </div>
+
+  </div>
+  
+</div>
+
+      </div>
+      <div class="gist-meta">
+        <a href="https://gist.github.com/jonathan-beard/17393a7224f927e034b6/raw/c8cea850324f8f434c7f82311926f693eb2730ed/Makefile" style="float:right">view raw</a>
+        <a href="https://gist.github.com/jonathan-beard/17393a7224f927e034b6#file-makefile">Makefile</a>
+        hosted with ❤ by <a href="https://github.com/">GitHub</a>
+      </div>
+    </div>
+</div>
+
+<p></p>
+   <p>
+   Be aware that some compilers still use the c++0x flag for standard in lieu or the 
+   c++11 flag.  If you are not using <em>clang</em> as your compiler you should change the appropriate lines within the Makefile so that <em>make</em>
+   will know which compiler to call.  The full code is available for download from my git-hub page
+   here:
+   <a href="https://github.com/jonathan-beard/simple_wc_example.git">https://github.com/jonathan-beard/simple_wc_example.git</a> 
+   or 
+   <a href="https://github.com/jonathan-beard/simple_wc_example/archive/master.zip"> Zip Download </a>.  
+   
+   If you find some errors, feel free to hop on GitHub and correct them!!  I'll update the pieces here accordingly.
+   </p>
+	<!-- end #mainContent -->
+  </div>
+
+    
+    
+<!--            </div>
+      </div> -->
+    </div>
+    </div>
+    </div>
+            
+                <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p>Copyright © Jonathan Beard 2015</p>
+        </div>
+    </footer>
+
+             <!-- jQuery Version 1.11.0 
+    <script src="/js/jquery.js"></script> -->
+   <!-- latest version -->
+<script src="./FlexBisonCplusplus_files/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript 
+    <script src="/js/bootstrap.min.js"></script> -->
+   <script src="./FlexBisonCplusplus_files/bootstrap.min.js"></script>
+
+    <!-- Plugin JavaScript 
+    <script src="/js/jquery.easing.min.js"></script> -->
+    <script src="./FlexBisonCplusplus_files/jquery.easing.min.js"></script>
+
+
+
+    <!-- Custom Theme JavaScript -->
+    <script src="./FlexBisonCplusplus_files/grayscale.js"></script>
+
+
+    
+
+</div></body></html>

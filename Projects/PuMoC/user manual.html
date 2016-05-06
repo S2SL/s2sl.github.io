@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>LIAFA -- PuMoC</title>
+</head>
+
+<body>
+<blockquote>
+  <h1><strong><font color="#0000A0" size="7">PuMoC</font></strong></h1>
+  <h1><strong><font size="5">A CTL Model Checker for Sequential Program</font></strong><font size="5">s</font></h1>
+</blockquote>
+<table width="1010" height="40" border="0" align="left" bordercolor="#FFFFFF" summary="main-menu">
+  <tr>
+    <td width="140" bordercolor="#FFFFFF" bgcolor="#D7EFFF"><div align="center">
+      <p><a href="index.html"><font size="5">Home</font></a></p>
+    </div></td>
+    <td width="140" align="center" valign="middle" bordercolor="#FFFFFF" bgcolor="#D7EFFF"><div align="center">
+      <p><a href="download.html"><font size="5">Download</font></a></p>
+    </div></td>
+    <td width="140" align="center" valign="middle" bordercolor="#FFFFFF" bgcolor="#D7EFFF"><div align="center">
+      <p><a href="quick start.html"><font size="5">Quick Start</font></a></p>
+    </div></td>
+    <td width="140" align="center" valign="middle" bordercolor="#FFFFFF" bgcolor="#D7EFFF"><div align="center">
+      <p><a href="references.html"><font size="5">References</font></a></p>
+    </div></td>
+    <td width="140" align="center" valign="middle" bordercolor="#FFFFFF" bgcolor="#D7EFFF"><p><a href="experiments.html"><font size="5">Experiments</font></a></p>    </td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<hr size="3" noshade>
+<h3><font color="#0000FF">The syntax of CTL  is described below.</font></h3>
+<table border="1" align="center" cellspacing="0" bordercolor="#999999">
+  <tr>
+    <td>#e#</td>
+    <td><code>e</code> a regular predicate (regular valuations) described as following table. </td>
+  </tr>
+  <tr>
+    <td width="66"><code>identifier</code></td>
+    <td width="793">Atomic proposition is an alphanumeric string with underscore <code><font color="#FF0000">_</font></code>, colon<font color="#FF0000"> :</font> and dollar mark <font color="#FF0000">$</font> except for keywords. Case is significant. </td>
+  </tr>
+  <tr>
+    <td><code>!f</code></td>
+    <td>The negation of the CTL formula <code>f</code>.</td>
+  </tr>
+  <tr>
+    <td><code>f || g </code></td>
+    <td>The disjunction of the CTL formulas <code>f </code>and <code>g</code>.</td>
+  </tr>
+  <tr>
+    <td><code>f &amp;&amp; g </code></td>
+    <td>The conjunction of the CTL formulas <code>f </code>and <code>g</code>.</td>
+  </tr>
+  <tr>
+    <td><code>f -&gt; g </code></td>
+    <td>The CTL formula <code>f</code> implies the CTL formula <code>g</code>. </td>
+  </tr>
+  <tr>
+    <td><code>f &lt;-&gt; g </code></td>
+    <td><code>f -&gt; g and g -&gt;f.</code></td>
+  </tr>
+  <tr>
+    <td><code>EX f </code></td>
+    <td>For some computation path, next time <code>f</code>. </td>
+  </tr>
+  <tr>
+    <td><code>AX f </code></td>
+    <td>For all computation paths, next time <code>f</code>. </td>
+  </tr>
+  <tr>
+    <td><code>EF f </code></td>
+    <td>For some computation path, eventually <code>f</code>. </td>
+  </tr>
+  <tr>
+    <td><code>AF f </code></td>
+    <td>For all computation paths, eventually <code>f</code>. </td>
+  </tr>
+  <tr>
+    <td><code>EG f </code></td>
+    <td>For some computation path, always <code>f</code>. </td>
+  </tr>
+  <tr>
+    <td><code>AG f </code></td>
+    <td>For all computation paths, always <code>f</code>. </td>
+  </tr>
+  <tr>
+    <td><code>E[f U g]</code></td>
+    <td>For some computation path,  always<code> f</code> until <code>g</code>.</td>
+  </tr>
+  <tr>
+    <td><code>A[f U g]</code></td>
+    <td>For all computation paths,  always<code> f</code> until <code>g</code>.</td>
+  </tr>
+  <tr>
+    <td><code>E[f W g]</code></td>
+    <td>It equals to <code>!A[!f U !g]</code>. </td>
+  </tr>
+  <tr>
+    <td><code>A[f W g]</code></td>
+    <td>It equals to <code>!E[!f U !g]</code>.</td>
+  </tr>
+  <tr>
+    <td>(f)</td>
+    <td>The CTL formula <code>f</code>. </td>
+  </tr>
+</table>
+<h3><font color="#0000FF">The syntax of Regular Predicates (Regular valuations) is given in regular expression described below.</font></h3>
+<table border="1" align="center" cellspacing="0" bordercolor="#999999">
+  <tr>
+    <td width="80"><code>identifier</code></td>
+    <td width="762">Matching the word <code>identifier </code> in any alphanumeric string with underscore <code><font color="#FF0000">_</font></code>, colon<font color="#FF0000"> :</font> and dollar mark <font color="#FF0000">$</font> begin with alphanumeric, except for keywords. Case is significant.</td>
+  </tr>
+  <tr>
+    <td><code>.</code></td>
+    <td>Matching any word. </td>
+  </tr>
+  <tr>
+    <td><code>|</code></td>
+    <td>The concatenation operator.</td>
+  </tr>
+  <tr>
+    <td><code>+</code></td>
+    <td>The choice operator.</td>
+  </tr>
+  <tr>
+    <td><code>*</code></td>
+    <td>Kleene closure. </td>
+  </tr>
+  <tr>
+    <td>(e)</td>
+    <td>The regular expression <code>e</code>. </td>
+  </tr>
+</table>
+<h3><font color="#0000FF">The syntax of Alternating Buechi Pushdown Systems.</font></h3>
+<p><font color="#000000">Alternating Buechi Pushdown System</font> is given in the following form</p>
+<blockquote>
+  <p><code>(p0 &lt;r0&gt;)</code><font color="#0000FF"> T</font><font color="#0000FF">he initial configuration with control location <code>p0</code> and the stack content <code>r0</code>. PuMoC outputs a finite automaton if the initial configuraiton is not given.</font></p>
+  <p><code>ACCEPTING  p18,p19</code> <font color="#0000FF">The accepting control locations.</font></p>
+  <p><code>p0 &lt;r0&gt; --&gt; p1 &lt; &gt; </code><font color="#0000FF">Pop transition </font><code><br>
+  p4 &lt;r2&gt; --&gt; p2 &lt;r2&gt; </code><font color="#0000FF">Rewrite transition </font><code><br>
+  p4 &lt;r3&gt; --&gt; p4 &lt;r2 r3&gt; </code><font color="#0000FF">Push transition </font><code><br>
+  p1 &lt;r1&gt; --&gt; p18 &lt;r3 r1&gt; &amp; p19 &lt;r0 r3&gt;</code> <font color="#0000FF">Alternating transition </font></p>
+</blockquote>
+<h3><font color="#0000FF">The syntax of  Pushdown Systems.</font></h3>
+<p>PuMoC can process the syntax of pushdown systems given in <a href="http://www.fmi.uni-stuttgart.de/szs/tools/moped/">Moped</a> and <a href="http://www.cs.ox.ac.uk/matthew.hague/pdsolver.html">PDSolver</a>. </p>
+<h3><font color="#0000FF">The syntax of Boolean Programs.</font></h3>
+<p><font color="#000000">PuMoC can process the syntax of boolean programs given in <a href="SLAM">SLAM</a> and <a href="http://www.cprover.org/satabs/">Satabs</a> except the concurrent instructions .</font></p>
+<hr noshade>
+<p align="center">Copyright © 2011-2012 LIAFA, University of Paris Diderot and CNRS.</p>
+</body>
+</html>
