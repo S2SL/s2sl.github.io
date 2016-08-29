@@ -59,7 +59,7 @@
 <p align="center"><img src="Architecture.png" width="831" height="292"></p>
 <font size="3">&nbsp;</font> 
 <p><span><a name="Download"></a><strong><font color="#0000ff" size="4">Download</font></strong></span><font size="3"> </font></p>
-<p><font size="3"><span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> has been tested mainly on Linux distributions <a href="PuMoC.tar.gz">Binary</a> </font></p>
+<p><font size="3"><span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> has been tested mainly on Linux distributions <a href="pommade">Binary</a> </font></p>
 <blockquote><font size="3">&nbsp;</font></blockquote>
 <p><font size="3"><strong>Tips for installing <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> on Linux</strong><strong>.</strong></font></p>
 <p><font size="3"><span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> relies on a commerical tool IDA Pro and several open source tools (CUDD, libcstl and Jakstab). After downloading the source code of <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span>, these tools have to be installed. </font></p>
@@ -282,7 +282,7 @@ which allows them to produce different-looking viruses. Our results are reported
 </tr>
 <tr>
 <th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
-<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">∨ </span></div>
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">�?</span></div>
 </th>
 <td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
 <div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">||</span></div>
@@ -290,7 +290,7 @@ which allows them to produce different-looking viruses. Our results are reported
 </tr>
 <tr>
 <th style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
-<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">∧ </span></div>
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">�?</span></div>
 </th>
 <td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
 <div align="center"><span style="COLOR:#000000">&amp;</span><span style="COLOR:#000000">&amp; </span></div>
@@ -298,7 +298,7 @@ which allows them to produce different-looking viruses. Our results are reported
 </tr>
 <tr>
 <th rowspan="2" style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:142px;HEIGHT:33px;VERTICAL-ALIGN:middle;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
-<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">∃</span><span style="FONT-STYLE:italic;COLOR:#000000">x </span></div>
+<div align="center"><span style="FONT-FAMILY:sans-serif,txsy;COLOR:#000000">�?/span><span style="FONT-STYLE:italic;COLOR:#000000">x </span></div>
 </th>
 <td style="BORDER-BOTTOM:#000000 1px solid;BORDER-LEFT:#000000 1px solid;WIDTH:245px;HEIGHT:17px;BORDER-TOP:#000000 1px solid;BORDER-RIGHT:#000000 1px solid">
 <div align="center"><span style="COLOR:#000000">E</span><span style="COLOR:#000000">s x </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">f </span><span style="FONT-STYLE:italic;COLOR:#000000">x </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">s </span><span style="COLOR:#000000">use</span><span style="COLOR:#000000">d </span><span style="COLOR:#000000">i</span><span style="COLOR:#000000">n </span><span style="COLOR:#000000">regula</span><span style="COLOR:#000000">r </span><span style="COLOR:#000000">variabl</span><span style="COLOR:#000000">e </span><span style="COLOR:#000000">expression</span><span style="COLOR:#000000">s </span></div>
@@ -428,11 +428,11 @@ which allows them to produce different-looking viruses. Our results are reported
 </tbody>
 </table>
 <h3 align="center"><font size="3">&nbsp; </font></h3>
-<p><font size="3">For example, the SCTPL formula, <span>∃x EF ( call(GetModuleFileNameA) ∧ 0xΓ*∧ EF(call(CopyFileA) ∧ xΓ*) )</span> will be in <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> syntax as follows:</font></p>
+<p><font size="3">For example, the SCTPL formula, <span>∃x EF ( call(GetModuleFileNameA) �?0xΓ*�?EF(call(CopyFileA) �?xΓ*) )</span> will be in <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> syntax as follows:</font></p>
 <p align="center"><font size="3"><font color="#ff0000"><span>Es x EF( call(GetModuleFileNameA) &amp;&amp; #0.x.|*#&amp;&amp; EF(call(CopyFileA) &amp;&amp; #x.|*#) )</span> </font></font></p>
 <p align="center">&nbsp;</p>
-<p align="left"><font size="3">The SLTPL formula G ( F ( ∃x cmp(x, 5A4Dh) ∧ F ∃y cmp(y, 4550h) ) ) will be in PoMMaDe syntax as follows:</font></p>
-<p style="TEXT-ALIGN:center"><font color="#ff0000" size="3">G ( F ( Eo x cmp(x, 5A4Dh) ∧ F Eo y cmp(y, 4550h) ) )</font></p>
+<p align="left"><font size="3">The SLTPL formula G ( F ( ∃x cmp(x, 5A4Dh) �?F ∃y cmp(y, 4550h) ) ) will be in PoMMaDe syntax as follows:</font></p>
+<p style="TEXT-ALIGN:center"><font color="#ff0000" size="3">G ( F ( Eo x cmp(x, 5A4Dh) �?F Eo y cmp(y, 4550h) ) )</font></p>
 <p align="center">&nbsp;</p>
 </div>
 <div><font size="3"><font color="#ff0000">The usage</font> of <span style="FONT-VARIANT:small-caps"><strong>P<span>o</span>MM<span>a</span>D<span>e</span></strong></span> is as follows: <span>pommade [-&lt;options&gt;] &lt;modelfile&gt; &lt;formula&gt;</span></font></div>
